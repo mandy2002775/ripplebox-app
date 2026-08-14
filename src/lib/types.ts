@@ -5,6 +5,15 @@ export type Client = {
   referral_code: string;
 };
 
+export type PlanType = 'monthly' | 'annual';
+
+export type SalonSubscription = {
+  id: string;
+  plan_type: PlanType;
+  status: string;
+  current_period_end: string;
+};
+
 export type Salon = {
   id: string;
   business_name: string;
@@ -14,6 +23,7 @@ export type Salon = {
   google_place_id: string | null;
   logo_url: string | null;
   subscription_status: string;
+  subscription: SalonSubscription | null;
 };
 
 export type User = {
