@@ -13,6 +13,10 @@ export default function HomeScreen() {
     return <Redirect href="/salon-profile-setup" />;
   }
 
+  if (user.user_type === 'salon' && user.salon && !user.salon.subscription) {
+    return <Redirect href="/subscription-setup" />;
+  }
+
   if (user.user_type === 'salon' && user.salon) {
     return <SalonHome user={user} />;
   }

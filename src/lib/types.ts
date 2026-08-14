@@ -5,6 +5,15 @@ export type Client = {
   referral_code: string;
 };
 
+export type PlanType = 'monthly' | 'annual';
+
+export type SalonSubscription = {
+  id: string;
+  plan_type: PlanType;
+  status: string;
+  current_period_end: string;
+};
+
 export type Salon = {
   id: string;
   business_name: string;
@@ -14,6 +23,7 @@ export type Salon = {
   google_place_id: string | null;
   logo_url: string | null;
   subscription_status: string;
+  subscription: SalonSubscription | null;
 };
 
 export type User = {
@@ -80,4 +90,32 @@ export type ClientDashboard = {
   rewards_count: number;
   earned: number;
   redemptions: MyRedemption[];
+};
+
+export type NotificationType = 'referral_redeemed' | 'reward_earned';
+
+export type ReferralRedeemedPayload = {
+  referral_id: string;
+  referrer_name: string;
+  referred_name: string;
+};
+
+export type RewardEarnedPayload = {
+  referral_id: string;
+  reward_description: string;
+  reward_value: number;
+  salon_name: string;
+};
+
+export type AppNotification = {
+  id: string;
+  type: NotificationType;
+  payload: ReferralRedeemedPayload | RewardEarnedPayload;
+  read_at: string | null;
+  created_at: string;
+};
+
+export type NotificationsResponse = {
+  unread_count: number;
+  notifications: AppNotification[];
 };
