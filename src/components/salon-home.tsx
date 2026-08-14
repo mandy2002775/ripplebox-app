@@ -1,41 +1,73 @@
 import { useRouter, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { StatusBadge } from '@/components/status-badge';
 import { Brand } from '@/constants/theme';
 import { useAuth } from '@/contexts/auth-context';
-import { apiRequest } from '@/lib/api';
-import { SalonDashboard, User } from '@/lib/types';
+import { apiRequest, ApiError } from '@/lib/api';
+import { NotificationsResponse, SalonDashboard, User } from '@/lib/types';
 import { RowButton } from '@/components/row-button';
 
 export function SalonHome({ user }: { user: User }) {
   const { token, signOut } = useAuth();
   const router = useRouter();
   const [dashboard, setDashboard] = useState<SalonDashboard | null>(null);
+  const [unreadCount, setUnreadCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [pickingRewardFor, setPickingRewardFor] = useState<string | null>(null);
+  const [isCompleting, setIsCompleting] = useState(false);
+  const [completeError, setCompleteError] = useState<string | null>(null);
 
-  useFocusEffect(
-    useCallback(() => {
-      let cancelled = false;
-      setIsLoading(true);
-      apiRequest<SalonDashboard>('/salons/dashboard', { token })
-        .then((data) => {
-          if (!cancelled) setDashboard(data);
-        })
-        .finally(() => {
-          if (!cancelled) setIsLoading(false);
-        });
-      return () => {
-        cancelled = true;
-      };
-    }, [token])
-  );
+  const load = useCallback(() => {
+    setIsLoading(true);
+    return Promise.all([
+      apiRequest<SalonDashboard>('/salons/dashboard', { token }),
+      apiRequest<NotificationsResponse>('/notifications', { token }),
+    ])
+      .then(([d, n]) => {
+        setDashboard(d);
+        setUnreadCount(n.unread_count);
+      })
+      .finally(() => setIsLoading(false));
+  }, [token]);
+
+  useFocusEffect(useCallback(() => { load(); }, [load]));
+
+  async function handleComplete(referralId: string, rewardId: string) {
+    setCompleteError(null);
+    setIsCompleting(true);
+    try {
+      await apiRequest(`/referrals/${referralId}/complete`, {
+        method: 'PATCH',
+        token,
+        body: { reward_id: rewardId },
+      });
+      setPickingRewardFor(null);
+      load();
+    } catch (e) {
+      setCompleteError(e instanceof ApiError ? e.message : 'Could not complete this referral.');
+    } finally {
+      setIsCompleting(false);
+    }
+  }
 
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
-      <Text style={styles.eyebrow}>Business dashboard</Text>
-      <Text style={styles.name}>{user.salon?.business_name}</Text>
+      <View style={styles.headerRow}>
+        <View>
+          <Text style={styles.eyebrow}>Business dashboard</Text>
+          <Text style={styles.name}>{user.salon?.business_name}</Text>
+        </View>
+        <Pressable onPress={() => router.push('/notifications')} style={styles.bellButton}>
+          <Text style={styles.bellIcon}>🔔</Text>
+          {unreadCount > 0 && (
+            <View style={styles.bellBadge}>
+              <Text style={styles.bellBadgeText}>{unreadCount > 9 ? '9+' : unreadCount}</Text>
+            </View>
+          )}
+        </Pressable>
+      </View>
 
       {isLoading || !dashboard ? (
         <ActivityIndicator color={Brand.brand} style={{ marginTop: 20 }} />
@@ -57,13 +89,44 @@ export function SalonHome({ user }: { user: User }) {
             <Text style={styles.emptyText}>No referrals yet.</Text>
           ) : (
             dashboard.recent_referrals.map((r) => (
-              <View key={r.id} style={styles.row}>
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.rowTitle}>
-                    {r.referrer_name} referred {r.referred_name}
-                  </Text>
+              <View key={r.id}>
+                <View style={styles.row}>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.rowTitle}>
+                      {r.referrer_name} referred {r.referred_name}
+                    </Text>
+                  </View>
+                  {r.status === 'pending' && dashboard.active_rewards.length > 0 ? (
+                    <Pressable
+                      onPress={() =>
+                        setPickingRewardFor(pickingRewardFor === r.id ? null : r.id)
+                      }
+                      style={styles.completeLink}>
+                      <Text style={styles.completeLinkText}>Complete</Text>
+                    </Pressable>
+                  ) : (
+                    <StatusBadge status={r.status} />
+                  )}
                 </View>
-                <StatusBadge status={r.status} />
+
+                {pickingRewardFor === r.id && (
+                  <View style={styles.rewardPicker}>
+                    <Text style={styles.rewardPickerLabel}>Pay out which reward?</Text>
+                    {dashboard.active_rewards.map((reward) => (
+                      <Pressable
+                        key={reward.id}
+                        disabled={isCompleting}
+                        onPress={() => handleComplete(r.id, reward.id)}
+                        style={({ pressed }) => [
+                          styles.rewardOption,
+                          (pressed || isCompleting) && styles.pressed,
+                        ]}>
+                        <Text style={styles.rewardOptionText}>{reward.description}</Text>
+                      </Pressable>
+                    ))}
+                    {completeError && <Text style={styles.error}>{completeError}</Text>}
+                  </View>
+                )}
               </View>
             ))
           )}
@@ -111,7 +174,42 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: '500',
     color: Brand.brand,
+  },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
     marginBottom: 18,
+  },
+  bellButton: {
+    width: 34,
+    height: 34,
+    borderRadius: 10,
+    backgroundColor: '#fff',
+    borderWidth: 0.5,
+    borderColor: Brand.border,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  bellIcon: {
+    fontSize: 15,
+  },
+  bellBadge: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    minWidth: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: Brand.red,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 3,
+  },
+  bellBadgeText: {
+    fontSize: 9,
+    fontWeight: '700',
+    color: '#fff',
   },
   statGrid: {
     flexDirection: 'row',
@@ -170,5 +268,51 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: Brand.text2,
     marginTop: 1,
+  },
+  completeLink: {
+    backgroundColor: Brand.lavender,
+    borderRadius: 20,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+  },
+  completeLinkText: {
+    fontSize: 11,
+    fontWeight: '500',
+    color: Brand.brand3,
+  },
+  rewardPicker: {
+    backgroundColor: '#fff',
+    borderWidth: 0.5,
+    borderColor: Brand.border,
+    borderRadius: 14,
+    padding: 12,
+    marginTop: -3,
+    marginBottom: 7,
+  },
+  rewardPickerLabel: {
+    fontSize: 10.5,
+    fontWeight: '500',
+    color: Brand.text3,
+    marginBottom: 8,
+  },
+  rewardOption: {
+    backgroundColor: Brand.lavender,
+    borderRadius: 11,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    marginBottom: 6,
+  },
+  rewardOptionText: {
+    fontSize: 12.5,
+    fontWeight: '500',
+    color: Brand.brand,
+  },
+  pressed: {
+    opacity: 0.75,
+  },
+  error: {
+    fontSize: 11.5,
+    color: Brand.red,
+    marginTop: 2,
   },
 });

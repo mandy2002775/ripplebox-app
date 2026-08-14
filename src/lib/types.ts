@@ -81,3 +81,31 @@ export type ClientDashboard = {
   earned: number;
   redemptions: MyRedemption[];
 };
+
+export type NotificationType = 'referral_redeemed' | 'reward_earned';
+
+export type ReferralRedeemedPayload = {
+  referral_id: string;
+  referrer_name: string;
+  referred_name: string;
+};
+
+export type RewardEarnedPayload = {
+  referral_id: string;
+  reward_description: string;
+  reward_value: number;
+  salon_name: string;
+};
+
+export type AppNotification = {
+  id: string;
+  type: NotificationType;
+  payload: ReferralRedeemedPayload | RewardEarnedPayload;
+  read_at: string | null;
+  created_at: string;
+};
+
+export type NotificationsResponse = {
+  unread_count: number;
+  notifications: AppNotification[];
+};

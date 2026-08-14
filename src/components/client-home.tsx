@@ -1,4 +1,4 @@
-import { useFocusEffect } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
@@ -15,12 +15,14 @@ import { RowButton } from '@/components/row-button';
 import { Brand } from '@/constants/theme';
 import { useAuth } from '@/contexts/auth-context';
 import { apiRequest, ApiError } from '@/lib/api';
-import { ClientDashboard, SalonSummary, User } from '@/lib/types';
+import { ClientDashboard, NotificationsResponse, SalonSummary, User } from '@/lib/types';
 
 export function ClientHome({ user }: { user: User }) {
   const { token, signOut } = useAuth();
+  const router = useRouter();
   const [dashboard, setDashboard] = useState<ClientDashboard | null>(null);
   const [salons, setSalons] = useState<SalonSummary[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedSalonId, setSelectedSalonId] = useState<string | null>(null);
   const [redeemCode, setRedeemCode] = useState('');
@@ -32,10 +34,12 @@ export function ClientHome({ user }: { user: User }) {
     Promise.all([
       apiRequest<ClientDashboard>('/clients/dashboard', { token }),
       apiRequest<SalonSummary[]>('/salons', { token }),
+      apiRequest<NotificationsResponse>('/notifications', { token }),
     ])
-      .then(([d, s]) => {
+      .then(([d, s, n]) => {
         setDashboard(d);
         setSalons(s);
+        setUnreadCount(n.unread_count);
       })
       .finally(() => setIsLoading(false));
   }, [token]);
@@ -78,8 +82,20 @@ export function ClientHome({ user }: { user: User }) {
 
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
-      <Text style={styles.eyebrow}>Good to see you</Text>
-      <Text style={styles.name}>{user.name}</Text>
+      <View style={styles.headerRow}>
+        <View>
+          <Text style={styles.eyebrow}>Good to see you</Text>
+          <Text style={styles.name}>{user.name}</Text>
+        </View>
+        <Pressable onPress={() => router.push('/notifications')} style={styles.bellButton}>
+          <Text style={styles.bellIcon}>🔔</Text>
+          {unreadCount > 0 && (
+            <View style={styles.bellBadge}>
+              <Text style={styles.bellBadgeText}>{unreadCount > 9 ? '9+' : unreadCount}</Text>
+            </View>
+          )}
+        </Pressable>
+      </View>
 
       <View style={styles.codeCard}>
         <Text style={styles.codeLabel}>Your referral code</Text>
@@ -182,7 +198,43 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
     marginBottom: 4,
   },
-  name: { fontSize: 22, fontWeight: '500', color: Brand.brand, marginBottom: 16 },
+  name: { fontSize: 22, fontWeight: '500', color: Brand.brand },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+  },
+  bellButton: {
+    width: 34,
+    height: 34,
+    borderRadius: 10,
+    backgroundColor: '#fff',
+    borderWidth: 0.5,
+    borderColor: Brand.border,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  bellIcon: {
+    fontSize: 15,
+  },
+  bellBadge: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    minWidth: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: Brand.red,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 3,
+  },
+  bellBadgeText: {
+    fontSize: 9,
+    fontWeight: '700',
+    color: '#fff',
+  },
   codeCard: {
     backgroundColor: Brand.rose,
     borderRadius: 16,

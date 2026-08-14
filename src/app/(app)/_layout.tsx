@@ -6,6 +6,7 @@ export default function AppLayout() {
       <Stack.Screen name="index" />
       <Stack.Screen name="salon-profile-setup" />
       <Stack.Screen name="rewards" />
+      <Stack.Screen name="notifications" />
     </Stack>
   );
 }
