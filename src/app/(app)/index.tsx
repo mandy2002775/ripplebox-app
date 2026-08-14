@@ -2,6 +2,7 @@ import { Redirect } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { SalonHome } from '@/components/salon-home';
 import { Brand } from '@/constants/theme';
 import { useAuth } from '@/contexts/auth-context';
 
@@ -14,33 +15,24 @@ export default function HomeScreen() {
     return <Redirect href="/salon-profile-setup" />;
   }
 
+  if (user.user_type === 'salon' && user.salon) {
+    return <SalonHome user={user} />;
+  }
+
   return (
     <View style={styles.screen}>
       <SafeAreaView style={styles.safeArea}>
-        <Text style={styles.eyebrow}>
-          {user.user_type === 'salon' ? 'Business account' : 'Client account'}
-        </Text>
+        <Text style={styles.eyebrow}>Client account</Text>
         <Text style={styles.name}>{user.name}</Text>
         <Text style={styles.phone}>{user.phone_number}</Text>
 
-        {user.user_type === 'client' && user.client && (
+        {user.client && (
           <View style={styles.card}>
             <Text style={styles.cardLabel}>Your referral code</Text>
             <Text style={styles.referralCode}>{user.client.referral_code}</Text>
             <Text style={styles.cardHint}>
               The full referral, rewards, and sharing screens are next — this confirms your login
               and account are wired up end to end.
-            </Text>
-          </View>
-        )}
-
-        {user.user_type === 'salon' && user.salon && (
-          <View style={styles.card}>
-            <Text style={styles.cardLabel}>{user.salon.business_name}</Text>
-            <Text style={styles.cardHint}>
-              {user.salon.location}
-              {'\n\n'}
-              Profile saved. Stripe subscription and the full dashboard are next.
             </Text>
           </View>
         )}

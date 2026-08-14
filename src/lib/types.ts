@@ -29,3 +29,35 @@ export type VerifyOtpResponse = {
   token: string;
   user: User;
 };
+
+export type RewardType = 'gift_card' | 'free_service' | 'product' | 'vip_perk';
+export type RecipientType = 'both' | 'referrer' | 'new_client';
+
+export type Reward = {
+  id: string;
+  salon_id: string;
+  reward_type: RewardType;
+  reward_value: string;
+  description: string;
+  recipient_type: RecipientType;
+  expiry_date: string;
+  is_active: boolean;
+  redemptions_count?: number;
+};
+
+export type ReferralStatus = 'pending' | 'engaged' | 'redeemed';
+
+export type RecentReferral = {
+  id: string;
+  referrer_name: string;
+  referred_name: string;
+  status: ReferralStatus;
+  created_at: string;
+};
+
+export type SalonDashboard = {
+  referrals_count: number;
+  converted_count: number;
+  recent_referrals: RecentReferral[];
+  active_rewards: Reward[];
+};
