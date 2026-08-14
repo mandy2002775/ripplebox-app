@@ -61,3 +61,23 @@ export type SalonDashboard = {
   recent_referrals: RecentReferral[];
   active_rewards: Reward[];
 };
+
+export type SalonSummary = {
+  id: string;
+  business_name: string;
+  location: string;
+};
+
+export type MyRedemption = {
+  id: string;
+  description: string;
+  salon_name: string;
+  redeemed_at: string;
+};
+
+export type ClientDashboard = {
+  referrals_count: number;
+  rewards_count: number;
+  earned: number;
+  redemptions: MyRedemption[];
+};
