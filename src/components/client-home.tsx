@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 
 import { RowButton } from '@/components/row-button';
+import { StatusBadge } from '@/components/status-badge';
 import { Brand } from '@/constants/theme';
 import { useAuth } from '@/contexts/auth-context';
 import { apiRequest, ApiError } from '@/lib/api';
@@ -125,6 +126,21 @@ export function ClientHome({ user }: { user: User }) {
               <Text style={styles.statLabel}>Earned</Text>
             </View>
           </View>
+
+          {dashboard.referrals.length > 0 && (
+            <>
+              <Text style={styles.sectionLabel}>My referrals</Text>
+              {dashboard.referrals.map((r) => (
+                <View key={r.id} style={styles.row}>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.rowTitle}>{r.referred_name}</Text>
+                    <Text style={styles.rowSub}>{r.salon_name}</Text>
+                  </View>
+                  <StatusBadge status={r.status} />
+                </View>
+              ))}
+            </>
+          )}
 
           {dashboard.redemptions.length > 0 && (
             <>

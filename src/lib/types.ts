@@ -85,10 +85,19 @@ export type MyRedemption = {
   redeemed_at: string;
 };
 
+export type MyReferral = {
+  id: string;
+  referred_name: string;
+  salon_name: string;
+  status: ReferralStatus;
+  created_at: string;
+};
+
 export type ClientDashboard = {
   referrals_count: number;
   rewards_count: number;
   earned: number;
+  referrals: MyReferral[];
   redemptions: MyRedemption[];
 };
 
