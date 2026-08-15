@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Image, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Brand } from '@/constants/theme';
@@ -52,9 +52,25 @@ export default function SalonProfileSetupScreen() {
   return (
     <View style={styles.screen}>
       <SafeAreaView style={styles.safeArea}>
-        <Text style={styles.eyebrow}>STEP 1 OF 2</Text>
         <Text style={styles.heading}>Business profile</Text>
-        <Text style={styles.subheading}>Tell clients who you are</Text>
+        <Text style={styles.subheading}>Step 1 of 2 — Your details</Text>
+
+        <View style={styles.logoRow}>
+          <View style={styles.logoPreview}>
+            {logoUrl.trim() ? (
+              <Image source={{ uri: logoUrl.trim() }} style={styles.logoImage} />
+            ) : (
+              <>
+                <Text style={styles.logoPlaceholderIcon}>📷</Text>
+                <Text style={styles.logoPlaceholderText}>Add logo</Text>
+              </>
+            )}
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.logoTitle}>Business logo</Text>
+            <Text style={styles.logoHint}>Paste a logo URL below — PNG or JPG</Text>
+          </View>
+        </View>
 
         <Text style={styles.fieldLabel}>Business name</Text>
         <TextInput
@@ -129,7 +145,7 @@ export default function SalonProfileSetupScreen() {
           {isSubmitting ? (
             <ActivityIndicator color="#fff" />
           ) : (
-            <Text style={styles.buttonText}>Save profile</Text>
+            <Text style={styles.buttonText}>Continue to payment</Text>
           )}
         </Pressable>
       </SafeAreaView>
@@ -147,13 +163,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 24,
   },
-  eyebrow: {
-    fontSize: 10,
-    color: Brand.text3,
-    fontWeight: '500',
-    letterSpacing: 0.5,
-    marginBottom: 5,
-  },
   heading: {
     fontSize: 21,
     fontWeight: '500',
@@ -164,6 +173,46 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: Brand.text2,
     marginBottom: 20,
+  },
+  logoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 16,
+  },
+  logoPreview: {
+    width: 62,
+    height: 62,
+    borderRadius: 18,
+    backgroundColor: Brand.lavender,
+    borderWidth: 1.5,
+    borderColor: Brand.accent,
+    borderStyle: 'dashed',
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  logoImage: {
+    width: 62,
+    height: 62,
+  },
+  logoPlaceholderIcon: {
+    fontSize: 20,
+  },
+  logoPlaceholderText: {
+    fontSize: 8,
+    color: Brand.text3,
+    marginTop: 2,
+  },
+  logoTitle: {
+    fontSize: 13,
+    fontWeight: '500',
+    color: Brand.brand,
+  },
+  logoHint: {
+    fontSize: 11,
+    color: Brand.text2,
+    marginTop: 1,
   },
   fieldLabel: {
     fontSize: 11,

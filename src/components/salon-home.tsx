@@ -81,14 +81,19 @@ export function SalonHome({ user }: { user: User }) {
             <Text style={styles.name}>{user.salon?.business_name}</Text>
           </View>
         </View>
-        <Pressable onPress={() => router.push('/notifications')} style={styles.bellButton}>
-          <Text style={styles.bellIcon}>🔔</Text>
-          {unreadCount > 0 && (
-            <View style={styles.bellBadge}>
-              <Text style={styles.bellBadgeText}>{unreadCount > 9 ? '9+' : unreadCount}</Text>
-            </View>
-          )}
-        </Pressable>
+        <View style={styles.headerActions}>
+          <Pressable onPress={() => router.push('/notifications')} style={styles.bellButton}>
+            <Text style={styles.bellIcon}>🔔</Text>
+            {unreadCount > 0 && (
+              <View style={styles.bellBadge}>
+                <Text style={styles.bellBadgeText}>{unreadCount > 9 ? '9+' : unreadCount}</Text>
+              </View>
+            )}
+          </Pressable>
+          <Pressable onPress={() => router.push('/profile')} style={styles.bellButton}>
+            <Text style={styles.bellIcon}>⚙️</Text>
+          </Pressable>
+        </View>
       </View>
 
       {isLoading || !dashboard ? (
@@ -220,6 +225,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
+  },
+  headerActions: {
+    flexDirection: 'row',
+    gap: 8,
   },
   logo: {
     width: 38,
