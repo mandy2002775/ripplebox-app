@@ -20,7 +20,7 @@ import { apiRequest, ApiError } from '@/lib/api';
 import { ClientDashboard, NotificationsResponse, SalonSummary, User } from '@/lib/types';
 
 export function ClientHome({ user }: { user: User }) {
-  const { token, signOut } = useAuth();
+  const { token } = useAuth();
   const router = useRouter();
   const [dashboard, setDashboard] = useState<ClientDashboard | null>(null);
   const [salons, setSalons] = useState<SalonSummary[]>([]);
@@ -198,8 +198,6 @@ export function ClientHome({ user }: { user: User }) {
               />
             </View>
           )}
-
-          <RowButton label="Sign out" variant="ghost" onPress={() => signOut()} />
         </>
       )}
     </ScrollView>

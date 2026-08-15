@@ -9,6 +9,10 @@ export default function HomeScreen() {
 
   if (!user) return null;
 
+  if (user.user_type === 'admin') {
+    return <Redirect href="/admin" />;
+  }
+
   if (user.user_type === 'salon' && !user.salon) {
     return <Redirect href="/salon-profile-setup" />;
   }

@@ -1,4 +1,4 @@
-import { useFocusEffect, useRouter } from 'expo-router';
+import { useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
@@ -34,7 +34,6 @@ const RECIPIENTS: { value: RecipientType; label: string }[] = [
 
 export default function RewardsScreen() {
   const { token } = useAuth();
-  const router = useRouter();
   const [tab, setTab] = useState<Tab>('create');
   const [rewards, setRewards] = useState<Reward[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -96,13 +95,8 @@ export default function RewardsScreen() {
     <View style={styles.screen}>
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.header}>
-          <Pressable onPress={() => router.back()} style={styles.backButton}>
-            <Text style={styles.backButtonText}>{'‹'}</Text>
-          </Pressable>
-          <View>
-            <Text style={styles.heading}>Rewards</Text>
-            <Text style={styles.subheading}>Create and manage your referral rewards</Text>
-          </View>
+          <Text style={styles.heading}>Rewards</Text>
+          <Text style={styles.subheading}>Create and manage your referral rewards</Text>
         </View>
 
         <View style={styles.tabRow}>
@@ -234,24 +228,10 @@ const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: Brand.bg },
   safeArea: { flex: 1 },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
     paddingHorizontal: 20,
     paddingTop: 12,
     marginBottom: 14,
   },
-  backButton: {
-    width: 30,
-    height: 30,
-    borderRadius: 8,
-    backgroundColor: '#fff',
-    borderWidth: 0.5,
-    borderColor: Brand.border,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  backButtonText: { fontSize: 18, color: Brand.brand, marginTop: -2 },
   heading: { fontSize: 16, fontWeight: '500', color: Brand.brand },
   subheading: { fontSize: 11, color: Brand.text2 },
   tabRow: {

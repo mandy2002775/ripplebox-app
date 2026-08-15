@@ -6,16 +6,11 @@ import { StatusBadge } from '@/components/status-badge';
 import { Brand } from '@/constants/theme';
 import { useAuth } from '@/contexts/auth-context';
 import { apiRequest, ApiError } from '@/lib/api';
-import { NotificationsResponse, PlanType, SalonDashboard, User } from '@/lib/types';
+import { NotificationsResponse, SalonDashboard, User } from '@/lib/types';
 import { RowButton } from '@/components/row-button';
 
-const PLAN_LABELS: Record<PlanType, string> = {
-  monthly: 'Monthly',
-  annual: 'Annual',
-};
-
 export function SalonHome({ user }: { user: User }) {
-  const { token, signOut, refreshUser } = useAuth();
+  const { token } = useAuth();
   const router = useRouter();
   const [dashboard, setDashboard] = useState<SalonDashboard | null>(null);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -25,9 +20,6 @@ export function SalonHome({ user }: { user: User }) {
   const [completeError, setCompleteError] = useState<string | null>(null);
   const [isEngaging, setIsEngaging] = useState(false);
   const [engageError, setEngageError] = useState<string | null>(null);
-  const [isConfirmingCancel, setIsConfirmingCancel] = useState(false);
-  const [isCancelling, setIsCancelling] = useState(false);
-  const [cancelError, setCancelError] = useState<string | null>(null);
 
   const load = useCallback(() => {
     setIsLoading(true);
@@ -74,20 +66,6 @@ export function SalonHome({ user }: { user: User }) {
       setCompleteError(e instanceof ApiError ? e.message : 'Could not complete this referral.');
     } finally {
       setIsCompleting(false);
-    }
-  }
-
-  async function handleCancelSubscription() {
-    setCancelError(null);
-    setIsCancelling(true);
-    try {
-      await apiRequest('/salons/subscription', { method: 'DELETE', token });
-      setIsConfirmingCancel(false);
-      await refreshUser();
-    } catch (e) {
-      setCancelError(e instanceof ApiError ? e.message : 'Could not cancel your subscription.');
-    } finally {
-      setIsCancelling(false);
     }
   }
 
@@ -203,54 +181,7 @@ export function SalonHome({ user }: { user: User }) {
             ))
           )}
 
-          {user.salon?.subscription && (
-            <>
-              <Text style={styles.sectionLabel}>Subscription</Text>
-              <View style={styles.row}>
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.rowTitle}>
-                    {PLAN_LABELS[user.salon.subscription.plan_type]} plan
-                  </Text>
-                  <Text style={styles.rowSub}>
-                    {user.salon.subscription.status === 'cancelled'
-                      ? 'Cancelled'
-                      : `Renews ${new Date(user.salon.subscription.current_period_end).toLocaleDateString()}`}
-                  </Text>
-                </View>
-                {user.salon.subscription.status !== 'cancelled' && (
-                  <Pressable
-                    onPress={() => setIsConfirmingCancel(!isConfirmingCancel)}
-                    style={styles.engageLink}>
-                    <Text style={styles.engageLinkText}>Cancel</Text>
-                  </Pressable>
-                )}
-              </View>
-
-              {isConfirmingCancel && (
-                <View style={styles.rewardPicker}>
-                  <Text style={styles.rewardPickerLabel}>
-                    Cancel your subscription? You can still use the dashboard, but this ends
-                    billing renewal.
-                  </Text>
-                  <Pressable
-                    disabled={isCancelling}
-                    onPress={handleCancelSubscription}
-                    style={({ pressed }) => [
-                      styles.rewardOption,
-                      (pressed || isCancelling) && styles.pressed,
-                    ]}>
-                    <Text style={styles.rewardOptionText}>
-                      {isCancelling ? 'Cancelling…' : 'Yes, cancel subscription'}
-                    </Text>
-                  </Pressable>
-                  {cancelError && <Text style={styles.error}>{cancelError}</Text>}
-                </View>
-              )}
-            </>
-          )}
-
           <RowButton label="+ Add reward" onPress={() => router.push('/rewards')} />
-          <RowButton label="Sign out" variant="ghost" onPress={() => signOut()} />
         </>
       )}
     </ScrollView>
