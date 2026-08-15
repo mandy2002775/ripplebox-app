@@ -1,6 +1,6 @@
 import { useRouter, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { StatusBadge } from '@/components/status-badge';
 import { Brand } from '@/constants/theme';
@@ -72,9 +72,14 @@ export function SalonHome({ user }: { user: User }) {
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
       <View style={styles.headerRow}>
-        <View>
-          <Text style={styles.eyebrow}>Business dashboard</Text>
-          <Text style={styles.name}>{user.salon?.business_name}</Text>
+        <View style={styles.headerIdentity}>
+          {user.salon?.logo_url && (
+            <Image source={{ uri: user.salon.logo_url }} style={styles.logo} />
+          )}
+          <View>
+            <Text style={styles.eyebrow}>Business dashboard</Text>
+            <Text style={styles.name}>{user.salon?.business_name}</Text>
+          </View>
         </View>
         <Pressable onPress={() => router.push('/notifications')} style={styles.bellButton}>
           <Text style={styles.bellIcon}>🔔</Text>
@@ -211,6 +216,17 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     justifyContent: 'space-between',
     marginBottom: 18,
+  },
+  headerIdentity: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  logo: {
+    width: 38,
+    height: 38,
+    borderRadius: 12,
+    backgroundColor: Brand.lavender,
   },
   bellButton: {
     width: 34,

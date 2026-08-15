@@ -2,6 +2,7 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
+  Image,
   Pressable,
   ScrollView,
   Share,
@@ -166,6 +167,7 @@ export function ClientHome({ user }: { user: User }) {
               key={s.id}
               onPress={() => setSelectedSalonId(s.id)}
               style={[styles.salonRow, selectedSalonId === s.id && styles.salonRowSelected]}>
+              {s.logo_url && <Image source={{ uri: s.logo_url }} style={styles.salonLogo} />}
               <View style={{ flex: 1 }}>
                 <Text style={styles.rowTitle}>{s.business_name}</Text>
                 <Text style={styles.rowSub}>{s.location}</Text>
@@ -316,6 +318,12 @@ const styles = StyleSheet.create({
   salonRowSelected: {
     borderWidth: 1.5,
     borderColor: Brand.brand,
+    backgroundColor: Brand.lavender,
+  },
+  salonLogo: {
+    width: 34,
+    height: 34,
+    borderRadius: 10,
     backgroundColor: Brand.lavender,
   },
   selectedMark: { color: Brand.brand, fontWeight: '700' },

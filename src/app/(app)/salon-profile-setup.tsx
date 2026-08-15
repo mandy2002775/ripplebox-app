@@ -16,6 +16,7 @@ export default function SalonProfileSetupScreen() {
   const [location, setLocation] = useState('');
   const [instagramHandle, setInstagramHandle] = useState('');
   const [website, setWebsite] = useState('');
+  const [logoUrl, setLogoUrl] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -31,6 +32,7 @@ export default function SalonProfileSetupScreen() {
           location: location.trim(),
           ...(instagramHandle.trim() ? { instagram_handle: instagramHandle.trim() } : {}),
           ...(website.trim() ? { website: website.trim() } : {}),
+          ...(logoUrl.trim() ? { logo_url: logoUrl.trim() } : {}),
         },
       });
       // Pulls the freshly created salon back into context, then returns to
@@ -92,6 +94,18 @@ export default function SalonProfileSetupScreen() {
           value={instagramHandle}
           onChangeText={setInstagramHandle}
           placeholder="@yoursalon"
+          placeholderTextColor={Brand.text3}
+          autoCapitalize="none"
+        />
+
+        <Text style={styles.fieldLabel}>
+          Logo URL <Text style={styles.optional}>(optional)</Text>
+        </Text>
+        <TextInput
+          style={styles.input}
+          value={logoUrl}
+          onChangeText={setLogoUrl}
+          placeholder="https://yoursalon.com.au/logo.png"
           placeholderTextColor={Brand.text3}
           autoCapitalize="none"
         />
