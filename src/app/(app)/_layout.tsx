@@ -9,6 +9,8 @@ export default function AppLayout() {
       <Stack.Screen name="welcome" />
       <Stack.Screen name="notifications" />
       <Stack.Screen name="admin" />
+      <Stack.Screen name="reports" />
+      <Stack.Screen name="db-schema" />
     </Stack>
   );
 }

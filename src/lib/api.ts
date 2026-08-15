@@ -1,4 +1,4 @@
-const BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:8000/api';
+export const BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:8000/api';
 
 export class ApiError extends Error {
   status: number;
@@ -39,4 +39,21 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
   }
 
   return data as T;
+}
+
+/**
+ * For endpoints that return a file (CSV/PDF export) rather than JSON.
+ */
+export async function apiBlobRequest(path: string, token?: string | null): Promise<Blob> {
+  const response = await fetch(`${BASE_URL}${path}`, {
+    headers: {
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+  });
+
+  if (!response.ok) {
+    throw new ApiError(response.status, 'Could not download this file.');
+  }
+
+  return response.blob();
 }

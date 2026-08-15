@@ -129,3 +129,43 @@ export type NotificationsResponse = {
   unread_count: number;
   notifications: AppNotification[];
 };
+
+export type AdminStats = {
+  active_salons_count: number;
+  active_salons_this_week: number;
+  total_clients_count: number;
+  total_clients_this_week: number;
+  total_referrals_count: number;
+  total_referrals_this_week: number;
+  monthly_revenue: number;
+};
+
+export type AdminSubscriptionSummary = {
+  id: string;
+  salon_name: string;
+  plan_type: PlanType;
+  status: string;
+  current_period_end: string | null;
+};
+
+export type ReportRange = '7' | '30' | '90' | 'all';
+
+export type ReportDailyPoint = {
+  date: string;
+  shared: number;
+  converted: number;
+};
+
+export type ReportTopSalon = {
+  salon_name: string;
+  referrals_count: number;
+};
+
+export type ReportsSummary = {
+  referrals_count: number;
+  conversions_count: number;
+  revenue: number;
+  cost_per_lead_pct: number;
+  daily: ReportDailyPoint[];
+  top_salons: ReportTopSalon[];
+};
