@@ -18,6 +18,8 @@ export function SalonHome({ user }: { user: User }) {
   const [pickingRewardFor, setPickingRewardFor] = useState<string | null>(null);
   const [isCompleting, setIsCompleting] = useState(false);
   const [completeError, setCompleteError] = useState<string | null>(null);
+  const [isEngaging, setIsEngaging] = useState(false);
+  const [engageError, setEngageError] = useState<string | null>(null);
 
   const load = useCallback(() => {
     setIsLoading(true);
@@ -33,6 +35,21 @@ export function SalonHome({ user }: { user: User }) {
   }, [token]);
 
   useFocusEffect(useCallback(() => { load(); }, [load]));
+
+  async function handleEngage(referralId: string) {
+    setEngageError(null);
+    setIsEngaging(true);
+    try {
+      await apiRequest(`/referrals/${referralId}/engage`, { method: 'PATCH', token });
+      load();
+    } catch (e) {
+      setEngageError(
+        e instanceof ApiError ? e.message : 'Could not mark this referral as engaged.'
+      );
+    } finally {
+      setIsEngaging(false);
+    }
+  }
 
   async function handleComplete(referralId: string, rewardId: string) {
     setCompleteError(null);
@@ -85,6 +102,7 @@ export function SalonHome({ user }: { user: User }) {
           </View>
 
           <Text style={styles.sectionLabel}>Recent referrals</Text>
+          {engageError && <Text style={styles.error}>{engageError}</Text>}
           {dashboard.recent_referrals.length === 0 ? (
             <Text style={styles.emptyText}>No referrals yet.</Text>
           ) : (
@@ -96,16 +114,29 @@ export function SalonHome({ user }: { user: User }) {
                       {r.referrer_name} referred {r.referred_name}
                     </Text>
                   </View>
-                  {r.status === 'pending' && dashboard.active_rewards.length > 0 ? (
-                    <Pressable
-                      onPress={() =>
-                        setPickingRewardFor(pickingRewardFor === r.id ? null : r.id)
-                      }
-                      style={styles.completeLink}>
-                      <Text style={styles.completeLinkText}>Complete</Text>
-                    </Pressable>
-                  ) : (
+                  {r.status === 'redeemed' ? (
                     <StatusBadge status={r.status} />
+                  ) : (
+                    <View style={styles.actionRow}>
+                      {r.status === 'engaged' && <StatusBadge status={r.status} />}
+                      {r.status === 'pending' && (
+                        <Pressable
+                          disabled={isEngaging}
+                          onPress={() => handleEngage(r.id)}
+                          style={styles.engageLink}>
+                          <Text style={styles.engageLinkText}>Mark engaged</Text>
+                        </Pressable>
+                      )}
+                      {dashboard.active_rewards.length > 0 && (
+                        <Pressable
+                          onPress={() =>
+                            setPickingRewardFor(pickingRewardFor === r.id ? null : r.id)
+                          }
+                          style={styles.completeLink}>
+                          <Text style={styles.completeLinkText}>Complete</Text>
+                        </Pressable>
+                      )}
+                    </View>
                   )}
                 </View>
 
@@ -268,6 +299,23 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: Brand.text2,
     marginTop: 1,
+  },
+  actionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  engageLink: {
+    borderWidth: 1,
+    borderColor: Brand.border,
+    borderRadius: 20,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+  },
+  engageLinkText: {
+    fontSize: 11,
+    fontWeight: '500',
+    color: Brand.text2,
   },
   completeLink: {
     backgroundColor: Brand.lavender,
