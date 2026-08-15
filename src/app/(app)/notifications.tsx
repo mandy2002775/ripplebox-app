@@ -51,6 +51,13 @@ export default function NotificationsScreen() {
     }
   }
 
+  async function handleMarkAllRead() {
+    await apiRequest('/notifications/read-all', { method: 'PATCH', token });
+    load();
+  }
+
+  const hasUnread = !!data?.unread_count;
+
   return (
     <View style={styles.screen}>
       <SafeAreaView style={styles.safeArea}>
@@ -59,6 +66,11 @@ export default function NotificationsScreen() {
             <Text style={styles.backButtonText}>{'‹'}</Text>
           </Pressable>
           <Text style={styles.heading}>Notifications</Text>
+          {hasUnread && (
+            <Pressable onPress={handleMarkAllRead} style={styles.markAllButton}>
+              <Text style={styles.markAllButtonText}>Mark all read</Text>
+            </Pressable>
+          )}
         </View>
 
         {isLoading || !data ? (
@@ -122,9 +134,21 @@ const styles = StyleSheet.create({
     marginTop: -2,
   },
   heading: {
+    flex: 1,
     fontSize: 21,
     fontWeight: '500',
     color: Brand.brand,
+  },
+  markAllButton: {
+    backgroundColor: Brand.lavender,
+    borderRadius: 20,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+  },
+  markAllButtonText: {
+    fontSize: 11,
+    fontWeight: '500',
+    color: Brand.brand3,
   },
   emptyText: {
     fontSize: 13,
