@@ -1,8 +1,10 @@
+import * as Clipboard from 'expo-clipboard';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
   Image,
+  Linking,
   Pressable,
   ScrollView,
   Share,
@@ -30,6 +32,7 @@ export function ClientHome({ user }: { user: User }) {
   const [redeemCode, setRedeemCode] = useState('');
   const [isRedeeming, setIsRedeeming] = useState(false);
   const [message, setMessage] = useState<{ text: string; isError: boolean } | null>(null);
+  const [isCopied, setIsCopied] = useState(false);
 
   const load = useCallback(() => {
     setIsLoading(true);
@@ -48,13 +51,36 @@ export function ClientHome({ user }: { user: User }) {
 
   useFocusEffect(useCallback(() => load(), [load]));
 
+  const shareMessage = `Use my Ripplebox code ${user.client?.referral_code} at a participating salon and we both get a reward!`;
+
   async function handleShare() {
-    const message = `Use my Ripplebox code ${user.client?.referral_code} at a participating salon and we both get a reward!`;
     try {
-      await Share.share({ message });
+      await Share.share({ message: shareMessage });
     } catch {
       // Share sheet unsupported (e.g. some web browsers) — nothing to do,
       // the code is already visible on screen to copy manually.
+    }
+  }
+
+  function handleShareWhatsApp() {
+    Linking.openURL(`https://wa.me/?text=${encodeURIComponent(shareMessage)}`);
+  }
+
+  function handleShareEmail() {
+    const subject = encodeURIComponent('Join me on Ripplebox');
+    Linking.openURL(`mailto:?subject=${subject}&body=${encodeURIComponent(shareMessage)}`);
+  }
+
+  async function handleCopyCode() {
+    if (!user.client?.referral_code) return;
+    try {
+      await Clipboard.setStringAsync(user.client.referral_code);
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2000);
+    } catch {
+      // Clipboard access can be denied by the platform (e.g. an embedded
+      // webview without clipboard permission) — the code is already
+      // visible on screen to copy manually, so just leave the button as is.
     }
   }
 
@@ -105,6 +131,17 @@ export function ClientHome({ user }: { user: User }) {
           <Text style={styles.code}>{user.client?.referral_code}</Text>
           <Pressable onPress={handleShare} style={styles.shareButton}>
             <Text style={styles.shareButtonText}>Share</Text>
+          </Pressable>
+        </View>
+        <View style={styles.quickShareRow}>
+          <Pressable onPress={handleShareWhatsApp} style={styles.quickShareChip}>
+            <Text style={styles.quickShareChipText}>💬 WhatsApp</Text>
+          </Pressable>
+          <Pressable onPress={handleShareEmail} style={styles.quickShareChip}>
+            <Text style={styles.quickShareChipText}>✉️ Email</Text>
+          </Pressable>
+          <Pressable onPress={handleCopyCode} style={styles.quickShareChip}>
+            <Text style={styles.quickShareChipText}>{isCopied ? '✓ Copied' : '📋 Copy'}</Text>
           </Pressable>
         </View>
       </View>
@@ -267,6 +304,21 @@ const styles = StyleSheet.create({
     paddingVertical: 7,
   },
   shareButtonText: { fontSize: 11, fontWeight: '500', color: '#fff' },
+  quickShareRow: {
+    flexDirection: 'row',
+    gap: 5,
+    marginTop: 9,
+  },
+  quickShareChip: {
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    borderRadius: 7,
+    paddingHorizontal: 9,
+    paddingVertical: 5,
+  },
+  quickShareChipText: {
+    fontSize: 10,
+    color: '#D0B8CC',
+  },
   statGrid: { flexDirection: 'row', gap: 8, marginBottom: 8 },
   stat: {
     flex: 1,
