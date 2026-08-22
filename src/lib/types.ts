@@ -77,6 +77,7 @@ export type SalonSummary = {
   business_name: string;
   location: string;
   logo_url: string | null;
+  top_reward: string | null;
 };
 
 export type MyRedemption = {

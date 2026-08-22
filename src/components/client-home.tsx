@@ -207,7 +207,10 @@ export function ClientHome({ user }: { user: User }) {
               {s.logo_url && <Image source={{ uri: s.logo_url }} style={styles.salonLogo} />}
               <View style={{ flex: 1 }}>
                 <Text style={styles.rowTitle}>{s.business_name}</Text>
-                <Text style={styles.rowSub}>{s.location}</Text>
+                <Text style={styles.rowSub}>
+                  {s.location}
+                  {s.top_reward ? ` • ${s.top_reward}` : ''}
+                </Text>
               </View>
               {selectedSalonId === s.id && <Text style={styles.selectedMark}>✓</Text>}
             </Pressable>
