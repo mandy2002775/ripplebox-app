@@ -139,6 +139,7 @@ export type AdminStats = {
   total_referrals_count: number;
   total_referrals_this_week: number;
   monthly_revenue: number;
+  pending_leads_count: number;
 };
 
 export type AdminSubscriptionSummary = {
@@ -147,6 +148,16 @@ export type AdminSubscriptionSummary = {
   plan_type: PlanType;
   status: string;
   current_period_end: string | null;
+};
+
+export type SalonLead = {
+  id: string;
+  business_name: string;
+  phone_number: string | null;
+  email: string | null;
+  location: string | null;
+  source: string;
+  created_at: string;
 };
 
 export type ReportRange = '7' | '30' | '90' | 'all';

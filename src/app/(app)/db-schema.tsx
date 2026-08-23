@@ -135,6 +135,19 @@ const TABLES: Table[] = [
       { name: 'deleted_at', type: 'soft delete' },
     ],
   },
+  {
+    name: 'salon_leads',
+    note: 'From website webhook',
+    accent: Brand.brand2,
+    fields: [
+      { name: 'id', type: 'UUID PK', kind: 'pk' },
+      { name: 'business_name', type: 'VARCHAR' },
+      { name: 'phone_number', type: 'VARCHAR nullable' },
+      { name: 'email', type: 'VARCHAR nullable' },
+      { name: 'location', type: 'VARCHAR nullable' },
+      { name: 'source', type: 'VARCHAR' },
+    ],
+  },
 ];
 
 export default function DbSchemaScreen() {
@@ -149,7 +162,7 @@ export default function DbSchemaScreen() {
           </Pressable>
           <View>
             <Text style={styles.heading}>Database schema</Text>
-            <Text style={styles.subheading}>SQLite (dev) / MySQL 8.0 (prod) · 9 tables</Text>
+            <Text style={styles.subheading}>SQLite (dev) / MySQL 8.0 (prod) · 10 tables</Text>
           </View>
         </View>
 

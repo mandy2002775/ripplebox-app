@@ -6,7 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Brand } from '@/constants/theme';
 import { useAuth } from '@/contexts/auth-context';
 import { apiRequest } from '@/lib/api';
-import { AdminStats, AdminSubscriptionSummary, PlanType } from '@/lib/types';
+import { AdminStats, AdminSubscriptionSummary, PlanType, SalonLead } from '@/lib/types';
 
 const PLAN_LABELS: Record<PlanType, string> = {
   monthly: 'Monthly',
@@ -25,6 +25,7 @@ export default function AdminScreen() {
   const router = useRouter();
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [subscriptions, setSubscriptions] = useState<AdminSubscriptionSummary[]>([]);
+  const [leads, setLeads] = useState<SalonLead[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const load = useCallback(() => {
@@ -32,10 +33,12 @@ export default function AdminScreen() {
     return Promise.all([
       apiRequest<AdminStats>('/admin/stats', { token }),
       apiRequest<AdminSubscriptionSummary[]>('/admin/subscriptions', { token }),
+      apiRequest<SalonLead[]>('/admin/leads', { token }),
     ])
-      .then(([s, subs]) => {
+      .then(([s, subs, l]) => {
         setStats(s);
         setSubscriptions(subs);
+        setLeads(l);
       })
       .finally(() => setIsLoading(false));
   }, [token]);
@@ -78,6 +81,10 @@ export default function AdminScreen() {
               <Text style={styles.statNumber}>{stats.total_referrals_count}</Text>
               <Text style={styles.statTrend}>+{stats.total_referrals_this_week} this week</Text>
             </View>
+            <View style={styles.stat}>
+              <Text style={styles.statLabel}>Website leads</Text>
+              <Text style={styles.statNumber}>{stats.pending_leads_count}</Text>
+            </View>
           </View>
         )}
 
@@ -102,6 +109,23 @@ export default function AdminScreen() {
                 </View>
               );
             })
+          )}
+
+          <Text style={styles.sectionLabel}>Website leads</Text>
+          {leads.length === 0 ? (
+            <Text style={styles.emptyText}>No signups from the website yet.</Text>
+          ) : (
+            leads.map((lead) => (
+              <View key={lead.id} style={styles.row}>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.rowTitle}>{lead.business_name}</Text>
+                  <Text style={styles.rowSub}>
+                    {[lead.location, lead.phone_number, lead.email].filter(Boolean).join(' • ') ||
+                      'No contact details'}
+                  </Text>
+                </View>
+              </View>
+            ))
           )}
 
           <Text style={styles.sectionLabel}>Quick actions</Text>
