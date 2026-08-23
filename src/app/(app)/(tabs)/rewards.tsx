@@ -88,8 +88,11 @@ export default function RewardsScreen() {
     load();
   }
 
-  const active = rewards.filter((r) => r.is_active);
-  const expired = rewards.filter((r) => !r.is_active);
+  // A reward past its own expiry_date can't be paid out anymore (enforced
+  // server-side too), so it belongs in "Expired" even if nobody paused it.
+  const isExpired = (r: Reward) => !r.is_active || new Date(r.expiry_date) < new Date();
+  const active = rewards.filter((r) => !isExpired(r));
+  const expired = rewards.filter(isExpired);
 
   return (
     <View style={styles.screen}>
@@ -206,17 +209,24 @@ export default function RewardsScreen() {
             (expired.length === 0 ? (
               <Text style={styles.emptyText}>No paused or expired rewards.</Text>
             ) : (
-              expired.map((r) => (
-                <View key={r.id} style={styles.rewardRow}>
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.rowTitle}>{r.description}</Text>
-                    <Text style={styles.rowSub}>${r.reward_value} &bull; Paused</Text>
+              expired.map((r) => {
+                const dateExpired = new Date(r.expiry_date) < new Date();
+                return (
+                  <View key={r.id} style={styles.rewardRow}>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.rowTitle}>{r.description}</Text>
+                      <Text style={styles.rowSub}>
+                        ${r.reward_value} &bull; {r.is_active ? 'Expired' : 'Paused'}
+                      </Text>
+                    </View>
+                    {!r.is_active && !dateExpired && (
+                      <Pressable onPress={() => togglePause(r)} style={styles.pauseButton}>
+                        <Text style={styles.pauseButtonText}>Resume</Text>
+                      </Pressable>
+                    )}
                   </View>
-                  <Pressable onPress={() => togglePause(r)} style={styles.pauseButton}>
-                    <Text style={styles.pauseButtonText}>Resume</Text>
-                  </Pressable>
-                </View>
-              ))
+                );
+              })
             ))}
         </ScrollView>
       </SafeAreaView>
