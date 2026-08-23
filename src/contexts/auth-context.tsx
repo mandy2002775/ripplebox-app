@@ -19,6 +19,7 @@ type AuthContextValue = {
   ) => Promise<User>;
   refreshUser: () => Promise<void>;
   signOut: () => Promise<void>;
+  deleteAccount: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -89,6 +90,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             // Best-effort revoke — still clear local state even if the API call fails
             // (e.g. offline), so the user isn't stuck signed in on-device.
           });
+        }
+
+        await secureStorage.removeItem(TOKEN_KEY);
+        setToken(null);
+        setUser(null);
+      },
+      async deleteAccount() {
+        if (token) {
+          await apiRequest('/me', { method: 'DELETE', token });
         }
 
         await secureStorage.removeItem(TOKEN_KEY);

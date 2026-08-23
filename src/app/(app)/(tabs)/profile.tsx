@@ -14,7 +14,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { RowButton } from '@/components/row-button';
 import { Brand } from '@/constants/theme';
 import { useAuth } from '@/contexts/auth-context';
-import { apiRequest, ApiError } from '@/lib/api';
+import { apiBlobRequest, apiRequest, ApiError } from '@/lib/api';
+import { saveBlob } from '@/lib/download';
 import { PlanType, Salon } from '@/lib/types';
 
 const PLAN_LABELS: Record<PlanType, string> = {
@@ -50,9 +51,86 @@ export default function ProfileScreen() {
             </View>
           )}
 
+          <PrivacySection token={token} />
+
           <RowButton label="Sign out" variant="ghost" onPress={() => signOut()} />
         </ScrollView>
       </SafeAreaView>
+    </View>
+  );
+}
+
+function PrivacySection({ token }: { token: string | null }) {
+  const { deleteAccount } = useAuth();
+  const [isExporting, setIsExporting] = useState(false);
+  const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleExport() {
+    setError(null);
+    setIsExporting(true);
+    try {
+      const blob = await apiBlobRequest('/me/export', token);
+      await saveBlob(blob, 'ripplebox-my-data.json', 'application/json');
+    } catch (e) {
+      setError(e instanceof ApiError ? e.message : 'Could not export your data.');
+    } finally {
+      setIsExporting(false);
+    }
+  }
+
+  async function handleDelete() {
+    setError(null);
+    setIsDeleting(true);
+    try {
+      await deleteAccount();
+    } catch (e) {
+      setError(e instanceof ApiError ? e.message : 'Could not delete your account.');
+      setIsDeleting(false);
+    }
+  }
+
+  return (
+    <View style={styles.card}>
+      <Text style={styles.fieldLabel}>Privacy</Text>
+
+      <Pressable
+        disabled={isExporting}
+        onPress={handleExport}
+        style={({ pressed }) => [styles.privacyRow, (pressed || isExporting) && styles.pressed]}>
+        <Text style={styles.privacyRowText}>
+          {isExporting ? 'Preparing your data…' : 'Download my data'}
+        </Text>
+      </Pressable>
+
+      {!isConfirmingDelete ? (
+        <Pressable onPress={() => setIsConfirmingDelete(true)} style={styles.privacyRow}>
+          <Text style={[styles.privacyRowText, styles.dangerText]}>Delete my account</Text>
+        </Pressable>
+      ) : (
+        <View style={styles.confirmBox}>
+          <Text style={styles.confirmText}>
+            This permanently deletes your account and all of your data. This can't be undone.
+          </Text>
+          <Pressable
+            disabled={isDeleting}
+            onPress={handleDelete}
+            style={({ pressed }) => [
+              styles.confirmButton,
+              (pressed || isDeleting) && styles.pressed,
+            ]}>
+            <Text style={[styles.confirmButtonText, styles.dangerText]}>
+              {isDeleting ? 'Deleting…' : 'Yes, delete my account'}
+            </Text>
+          </Pressable>
+          <Pressable onPress={() => setIsConfirmingDelete(false)} style={styles.cancelLink}>
+            <Text style={styles.cancelLinkText}>Cancel</Text>
+          </Pressable>
+        </View>
+      )}
+
+      {error && <Text style={styles.error}>{error}</Text>}
     </View>
   );
 }
@@ -259,6 +337,9 @@ const styles = StyleSheet.create({
   },
   error: { fontSize: 12, color: Brand.red, marginBottom: 10 },
   success: { fontSize: 12, color: Brand.green, marginBottom: 10 },
+  privacyRow: { paddingVertical: 10 },
+  privacyRowText: { fontSize: 13, color: Brand.brand },
+  dangerText: { color: Brand.red },
   button: {
     backgroundColor: Brand.brand,
     borderRadius: 14,
