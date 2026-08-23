@@ -29,6 +29,7 @@ export type Salon = {
 export type User = {
   id: string;
   phone_number: string;
+  email: string | null;
   name: string;
   user_type: UserType;
   client: Client | null;

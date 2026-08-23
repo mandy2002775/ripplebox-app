@@ -16,7 +16,7 @@ import { Brand } from '@/constants/theme';
 import { useAuth } from '@/contexts/auth-context';
 import { apiBlobRequest, apiRequest, ApiError } from '@/lib/api';
 import { saveBlob } from '@/lib/download';
-import { PlanType, Salon } from '@/lib/types';
+import { PlanType, Salon, User } from '@/lib/types';
 
 const PLAN_LABELS: Record<PlanType, string> = {
   monthly: 'Monthly',
@@ -51,11 +51,70 @@ export default function ProfileScreen() {
             </View>
           )}
 
+          <EmailSection user={user} token={token} refreshUser={refreshUser} />
+
           <PrivacySection token={token} />
 
           <RowButton label="Sign out" variant="ghost" onPress={() => signOut()} />
         </ScrollView>
       </SafeAreaView>
+    </View>
+  );
+}
+
+function EmailSection({
+  user,
+  token,
+  refreshUser,
+}: {
+  user: User;
+  token: string | null;
+  refreshUser: () => Promise<void>;
+}) {
+  const [email, setEmail] = useState(user.email ?? '');
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
+
+  async function handleSave() {
+    setError(null);
+    setSaved(false);
+    setIsSaving(true);
+    try {
+      await apiRequest('/me', { method: 'PATCH', token, body: { email: email.trim() || null } });
+      await refreshUser();
+      setSaved(true);
+    } catch (e) {
+      setError(e instanceof ApiError ? e.message : 'Could not save your email.');
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
+  return (
+    <View style={styles.card}>
+      <Text style={styles.fieldLabel}>
+        Email <Text style={styles.optional}>(optional)</Text>
+      </Text>
+      <Text style={styles.emailHint}>
+        Used only to send you reward and account emails — sign-in still works by phone.
+      </Text>
+      <TextInput
+        style={styles.input}
+        value={email}
+        onChangeText={setEmail}
+        placeholder="you@example.com"
+        autoCapitalize="none"
+        keyboardType="email-address"
+      />
+      {error && <Text style={styles.error}>{error}</Text>}
+      {saved && <Text style={styles.success}>Saved.</Text>}
+      <Pressable
+        disabled={isSaving}
+        onPress={handleSave}
+        style={({ pressed }) => [styles.button, (pressed || isSaving) && styles.pressed]}>
+        {isSaving ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Save email</Text>}
+      </Pressable>
     </View>
   );
 }
@@ -320,6 +379,11 @@ const styles = StyleSheet.create({
   optional: {
     color: Brand.text3,
     fontWeight: '400',
+  },
+  emailHint: {
+    fontSize: 11,
+    color: Brand.text3,
+    marginBottom: 10,
   },
   readValue: {
     fontSize: 14,
