@@ -18,14 +18,14 @@
         "simulator": false
       },
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://api.ripplebox.com.au/api"
+        "EXPO_PUBLIC_API_URL": "https://ripplebox-api-production.up.railway.app/api"
       }
     },
     "production": {
       "channel": "production",
       "autoIncrement": true,
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://api.ripplebox.com.au/api"
+        "EXPO_PUBLIC_API_URL": "https://ripplebox-api-production.up.railway.app/api"
       }
     }
   },
