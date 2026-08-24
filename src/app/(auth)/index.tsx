@@ -1,8 +1,11 @@
 import { useRouter } from 'expo-router';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Linking, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Brand } from '@/constants/theme';
+
+const TERMS_URL = 'https://claude.ai/code/artifact/b812c43a-a284-488c-872b-ca1f293eb17d';
+const PRIVACY_URL = 'https://claude.ai/code/artifact/78dcc113-2ffa-4b32-b2b5-b005d37f6c38';
 
 export default function WelcomeScreen() {
   const router = useRouter();
@@ -38,7 +41,14 @@ export default function WelcomeScreen() {
         </View>
 
         <Text style={styles.legal}>
-          By continuing you agree to our Terms of Service{'\n'}and Privacy Policy
+          By continuing you agree to our{' '}
+          <Text style={styles.legalLink} onPress={() => Linking.openURL(TERMS_URL)}>
+            Terms of Service
+          </Text>
+          {'\n'}and{' '}
+          <Text style={styles.legalLink} onPress={() => Linking.openURL(PRIVACY_URL)}>
+            Privacy Policy
+          </Text>
         </Text>
       </SafeAreaView>
     </View>
@@ -141,5 +151,9 @@ const styles = StyleSheet.create({
     color: '#6040A0',
     textAlign: 'center',
     lineHeight: 16,
+  },
+  legalLink: {
+    color: '#9070C0',
+    textDecorationLine: 'underline',
   },
 });
