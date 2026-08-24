@@ -137,11 +137,12 @@ const TABLES: Table[] = [
   },
   {
     name: 'salon_leads',
-    note: 'From website webhook',
+    note: 'From marketing site',
     accent: Brand.brand2,
     fields: [
       { name: 'id', type: 'UUID PK', kind: 'pk' },
       { name: 'business_name', type: 'VARCHAR' },
+      { name: 'owner_name', type: 'VARCHAR nullable' },
       { name: 'phone_number', type: 'VARCHAR nullable' },
       { name: 'email', type: 'VARCHAR nullable' },
       { name: 'location', type: 'VARCHAR nullable' },

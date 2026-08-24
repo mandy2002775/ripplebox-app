@@ -120,8 +120,9 @@ export default function AdminScreen() {
                 <View style={{ flex: 1 }}>
                   <Text style={styles.rowTitle}>{lead.business_name}</Text>
                   <Text style={styles.rowSub}>
-                    {[lead.location, lead.phone_number, lead.email].filter(Boolean).join(' • ') ||
-                      'No contact details'}
+                    {[lead.owner_name, lead.location, lead.phone_number, lead.email]
+                      .filter(Boolean)
+                      .join(' • ') || 'No contact details'}
                   </Text>
                 </View>
               </View>

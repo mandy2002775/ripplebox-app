@@ -154,6 +154,7 @@ export type AdminSubscriptionSummary = {
 export type SalonLead = {
   id: string;
   business_name: string;
+  owner_name: string | null;
   phone_number: string | null;
   email: string | null;
   location: string | null;
