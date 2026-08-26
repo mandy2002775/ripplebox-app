@@ -35,11 +35,20 @@
           "imageWidth": 120
         }
       ],
-      "expo-secure-store"
+      "expo-secure-store",
+      "expo-image",
+      "expo-sharing"
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "7cff8f2b-a086-4488-b6c7-7dfd6bd15368"
+      }
+    },
+    "owner": "mandip1121"
   }
 }
