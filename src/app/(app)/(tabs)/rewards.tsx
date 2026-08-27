@@ -37,6 +37,7 @@ export default function RewardsScreen() {
   const [tab, setTab] = useState<Tab>('create');
   const [rewards, setRewards] = useState<Reward[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
 
   const [rewardType, setRewardType] = useState<RewardType>('gift_card');
   const [rewardValue, setRewardValue] = useState('100');
@@ -46,10 +47,15 @@ export default function RewardsScreen() {
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const [togglingId, setTogglingId] = useState<string | null>(null);
+  const [toggleError, setToggleError] = useState<string | null>(null);
+
   const load = useCallback(() => {
     setIsLoading(true);
+    setLoadError(false);
     apiRequest<Reward[]>('/rewards', { token })
       .then(setRewards)
+      .catch(() => setLoadError(true))
       .finally(() => setIsLoading(false));
   }, [token]);
 
@@ -80,12 +86,22 @@ export default function RewardsScreen() {
   }
 
   async function togglePause(reward: Reward) {
-    await apiRequest<Reward>(`/rewards/${reward.id}`, {
-      method: 'PATCH',
-      token,
-      body: { is_active: !reward.is_active },
-    });
-    load();
+    setToggleError(null);
+    setTogglingId(reward.id);
+    try {
+      await apiRequest<Reward>(`/rewards/${reward.id}`, {
+        method: 'PATCH',
+        token,
+        body: { is_active: !reward.is_active },
+      });
+      load();
+    } catch (e) {
+      setToggleError(
+        e instanceof ApiError ? e.message : 'Could not update this reward. Please try again.'
+      );
+    } finally {
+      setTogglingId(null);
+    }
   }
 
   // A reward past its own expiry_date can't be paid out anymore (enforced
@@ -182,10 +198,22 @@ export default function RewardsScreen() {
             </View>
           )}
 
-          {tab !== 'create' && isLoading && <ActivityIndicator color={Brand.brand} />}
+          {tab !== 'create' && loadError && (
+            <View style={styles.errorBox}>
+              <Text style={styles.errorBoxText}>Couldn't load your rewards.</Text>
+              <Pressable onPress={load} style={styles.retryButton}>
+                <Text style={styles.retryButtonText}>Try again</Text>
+              </Pressable>
+            </View>
+          )}
+
+          {tab !== 'create' && !loadError && isLoading && <ActivityIndicator color={Brand.brand} />}
+
+          {toggleError && <Text style={styles.error}>{toggleError}</Text>}
 
           {tab === 'active' &&
             !isLoading &&
+            !loadError &&
             (active.length === 0 ? (
               <Text style={styles.emptyText}>No active rewards yet.</Text>
             ) : (
@@ -197,8 +225,13 @@ export default function RewardsScreen() {
                       ${r.reward_value} &bull; {r.recipient_type.replace('_', ' ')}
                     </Text>
                   </View>
-                  <Pressable onPress={() => togglePause(r)} style={styles.pauseButton}>
-                    <Text style={styles.pauseButtonText}>Pause</Text>
+                  <Pressable
+                    disabled={togglingId === r.id}
+                    onPress={() => togglePause(r)}
+                    style={[styles.pauseButton, togglingId === r.id && styles.pauseButtonDisabled]}>
+                    <Text style={styles.pauseButtonText}>
+                      {togglingId === r.id ? 'Pausing…' : 'Pause'}
+                    </Text>
                   </Pressable>
                 </View>
               ))
@@ -206,6 +239,7 @@ export default function RewardsScreen() {
 
           {tab === 'expired' &&
             !isLoading &&
+            !loadError &&
             (expired.length === 0 ? (
               <Text style={styles.emptyText}>No paused or expired rewards.</Text>
             ) : (
@@ -220,8 +254,16 @@ export default function RewardsScreen() {
                       </Text>
                     </View>
                     {!r.is_active && !dateExpired && (
-                      <Pressable onPress={() => togglePause(r)} style={styles.pauseButton}>
-                        <Text style={styles.pauseButtonText}>Resume</Text>
+                      <Pressable
+                        disabled={togglingId === r.id}
+                        onPress={() => togglePause(r)}
+                        style={[
+                          styles.pauseButton,
+                          togglingId === r.id && styles.pauseButtonDisabled,
+                        ]}>
+                        <Text style={styles.pauseButtonText}>
+                          {togglingId === r.id ? 'Resuming…' : 'Resume'}
+                        </Text>
                       </Pressable>
                     )}
                   </View>
@@ -339,4 +381,22 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
   },
   pauseButtonText: { fontSize: 11, fontWeight: '500', color: Brand.brand3 },
+  pauseButtonDisabled: { opacity: 0.6 },
+  errorBox: {
+    backgroundColor: '#fff',
+    borderWidth: 0.5,
+    borderColor: Brand.border,
+    borderRadius: 14,
+    padding: 20,
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  errorBoxText: { fontSize: 12.5, color: Brand.text2, marginBottom: 12 },
+  retryButton: {
+    backgroundColor: Brand.brand,
+    borderRadius: 10,
+    paddingHorizontal: 18,
+    paddingVertical: 9,
+  },
+  retryButtonText: { fontSize: 12.5, fontWeight: '500', color: '#fff' },
 });

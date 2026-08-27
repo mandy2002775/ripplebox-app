@@ -3,12 +3,14 @@ import { Linking, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Brand } from '@/constants/theme';
+import { useAuth } from '@/contexts/auth-context';
 
 const TERMS_URL = 'https://claude.ai/code/artifact/b812c43a-a284-488c-872b-ca1f293eb17d';
 const PRIVACY_URL = 'https://claude.ai/code/artifact/78dcc113-2ffa-4b32-b2b5-b005d37f6c38';
 
 export default function WelcomeScreen() {
   const router = useRouter();
+  const { sessionExpired } = useAuth();
 
   return (
     <View style={styles.screen}>
@@ -25,6 +27,14 @@ export default function WelcomeScreen() {
         <Text style={styles.tagline}>
           creating the ripple effect of referrals{'\n'}for hair and beauty
         </Text>
+
+        {sessionExpired && (
+          <View style={styles.sessionExpiredBanner}>
+            <Text style={styles.sessionExpiredText}>
+              You've been signed out — please sign in again.
+            </Text>
+          </View>
+        )}
 
         <View style={styles.actions}>
           <Pressable
@@ -112,6 +122,21 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 20,
     marginBottom: 48,
+  },
+  sessionExpiredBanner: {
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.15)',
+    borderRadius: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    marginBottom: 20,
+    width: '100%',
+  },
+  sessionExpiredText: {
+    fontSize: 12,
+    color: 'rgba(255,255,255,0.85)',
+    textAlign: 'center',
   },
   actions: {
     width: '100%',

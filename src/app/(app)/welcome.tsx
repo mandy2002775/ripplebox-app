@@ -1,4 +1,4 @@
-import { useRouter } from 'expo-router';
+import { Redirect, useRouter } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -14,6 +14,14 @@ const STEPS = [
 export default function WelcomeScreen() {
   const { user } = useAuth();
   const router = useRouter();
+
+  // Only ever reached via subscription-setup.tsx's own redirect in normal
+  // use, but nothing stops a deep link landing here without that context —
+  // a client, or a salon that hasn't set up their business yet, would
+  // otherwise see "Welcome to Ripplebox, undefined!".
+  if (user && !user.salon) {
+    return <Redirect href="/" />;
+  }
 
   return (
     <View style={styles.screen}>

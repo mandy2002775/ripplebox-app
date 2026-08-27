@@ -13,20 +13,33 @@ import {
   RewardEarnedPayload,
 } from '@/lib/types';
 
+// The payload's shape is only as trustworthy as `type` says it is — a
+// backend/frontend version drift (a new notification type added server-side
+// before this client updates) shouldn't render "undefined" text, so this
+// checks the fields it needs are actually present rather than trusting the
+// cast blindly.
 function describe(notification: AppNotification): { title: string; subtitle: string } {
   if (notification.type === 'reward_earned') {
-    const payload = notification.payload as RewardEarnedPayload;
-    return {
-      title: `You earned a reward at ${payload.salon_name}`,
-      subtitle: payload.reward_description,
-    };
+    const payload = notification.payload as Partial<RewardEarnedPayload>;
+    if (payload.salon_name && payload.reward_description) {
+      return {
+        title: `You earned a reward at ${payload.salon_name}`,
+        subtitle: payload.reward_description,
+      };
+    }
   }
 
-  const payload = notification.payload as ReferralRedeemedPayload;
-  return {
-    title: 'New referral redeemed',
-    subtitle: `${payload.referrer_name} referred ${payload.referred_name}`,
-  };
+  if (notification.type === 'referral_redeemed') {
+    const payload = notification.payload as Partial<ReferralRedeemedPayload>;
+    if (payload.referrer_name && payload.referred_name) {
+      return {
+        title: 'New referral redeemed',
+        subtitle: `${payload.referrer_name} referred ${payload.referred_name}`,
+      };
+    }
+  }
+
+  return { title: 'Update', subtitle: 'Open the app for details.' };
 }
 
 export default function NotificationsScreen() {
@@ -34,26 +47,47 @@ export default function NotificationsScreen() {
   const router = useRouter();
   const [data, setData] = useState<NotificationsResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
+  const [openingId, setOpeningId] = useState<string | null>(null);
+  const [isMarkingAll, setIsMarkingAll] = useState(false);
 
   const load = useCallback(() => {
     setIsLoading(true);
+    setLoadError(false);
     return apiRequest<NotificationsResponse>('/notifications', { token })
       .then(setData)
+      .catch(() => setLoadError(true))
       .finally(() => setIsLoading(false));
   }, [token]);
 
   useFocusEffect(useCallback(() => { load(); }, [load]));
 
   async function handleOpen(notification: AppNotification) {
-    if (!notification.read_at) {
+    if (notification.read_at || openingId) return;
+    setOpeningId(notification.id);
+    try {
       await apiRequest(`/notifications/${notification.id}/read`, { method: 'PATCH', token });
-      load();
+      await load();
+    } catch {
+      // Best-effort — the notification just stays marked unread if this
+      // fails, no need to interrupt the user with an error for it.
+    } finally {
+      setOpeningId(null);
     }
   }
 
   async function handleMarkAllRead() {
-    await apiRequest('/notifications/read-all', { method: 'PATCH', token });
-    load();
+    if (isMarkingAll) return;
+    setIsMarkingAll(true);
+    try {
+      await apiRequest('/notifications/read-all', { method: 'PATCH', token });
+      await load();
+    } catch {
+      // Best-effort, same as handleOpen — unread badges just stay as they
+      // were if this fails.
+    } finally {
+      setIsMarkingAll(false);
+    }
   }
 
   const hasUnread = !!data?.unread_count;
@@ -67,13 +101,25 @@ export default function NotificationsScreen() {
           </Pressable>
           <Text style={styles.heading}>Notifications</Text>
           {hasUnread && (
-            <Pressable onPress={handleMarkAllRead} style={styles.markAllButton}>
-              <Text style={styles.markAllButtonText}>Mark all read</Text>
+            <Pressable
+              disabled={isMarkingAll}
+              onPress={handleMarkAllRead}
+              style={[styles.markAllButton, isMarkingAll && styles.markAllButtonDisabled]}>
+              <Text style={styles.markAllButtonText}>
+                {isMarkingAll ? 'Marking…' : 'Mark all read'}
+              </Text>
             </Pressable>
           )}
         </View>
 
-        {isLoading || !data ? (
+        {loadError ? (
+          <View style={styles.errorBox}>
+            <Text style={styles.errorBoxText}>Couldn't load notifications.</Text>
+            <Pressable onPress={load} style={styles.retryButton}>
+              <Text style={styles.retryButtonText}>Try again</Text>
+            </Pressable>
+          </View>
+        ) : isLoading || !data ? (
           <ActivityIndicator color={Brand.brand} style={{ marginTop: 20 }} />
         ) : data.notifications.length === 0 ? (
           <Text style={styles.emptyText}>Nothing yet — you'll see referral and reward updates here.</Text>
@@ -150,6 +196,24 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: Brand.brand3,
   },
+  markAllButtonDisabled: { opacity: 0.6 },
+  errorBox: {
+    backgroundColor: '#fff',
+    borderWidth: 0.5,
+    borderColor: Brand.border,
+    borderRadius: 14,
+    padding: 20,
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  errorBoxText: { fontSize: 12.5, color: Brand.text2, marginBottom: 12 },
+  retryButton: {
+    backgroundColor: Brand.brand,
+    borderRadius: 10,
+    paddingHorizontal: 18,
+    paddingVertical: 9,
+  },
+  retryButtonText: { fontSize: 12.5, fontWeight: '500', color: '#fff' },
   emptyText: {
     fontSize: 13,
     color: Brand.text3,

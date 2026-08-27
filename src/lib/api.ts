@@ -11,6 +11,23 @@ export class ApiError extends Error {
   }
 }
 
+// Set by AuthProvider on mount. A 401 on an authenticated request means the
+// token is dead (expired/revoked) — every screen would otherwise need its
+// own logic to notice that and sign the user out; this makes it happen once,
+// centrally, no matter which screen's request happened to be the one that
+// got the 401.
+let onUnauthorized: (() => void) | null = null;
+
+export function setUnauthorizedHandler(handler: (() => void) | null): void {
+  onUnauthorized = handler;
+}
+
+function handleUnauthorized(status: number, hadToken: boolean) {
+  if (status === 401 && hadToken) {
+    onUnauthorized?.();
+  }
+}
+
 type RequestOptions = {
   method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
   body?: Record<string, unknown>;
@@ -31,6 +48,7 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
   const data = await response.json().catch(() => null);
 
   if (!response.ok) {
+    handleUnauthorized(response.status, !!options.token);
     throw new ApiError(
       response.status,
       data?.message ?? 'Something went wrong. Please try again.',
@@ -52,6 +70,7 @@ export async function apiBlobRequest(path: string, token?: string | null): Promi
   });
 
   if (!response.ok) {
+    handleUnauthorized(response.status, !!token);
     throw new ApiError(response.status, 'Could not download this file.');
   }
 

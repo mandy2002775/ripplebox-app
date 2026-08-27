@@ -1,8 +1,9 @@
-import { useRouter } from 'expo-router';
+import { Redirect, useRouter } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Brand } from '@/constants/theme';
+import { useAuth } from '@/contexts/auth-context';
 
 type Field = { name: string; type: string; kind?: 'pk' | 'fk' };
 
@@ -153,6 +154,11 @@ const TABLES: Table[] = [
 
 export default function DbSchemaScreen() {
   const router = useRouter();
+  const { user } = useAuth();
+
+  if (user && user.user_type !== 'admin') {
+    return <Redirect href="/" />;
+  }
 
   return (
     <View style={styles.screen}>

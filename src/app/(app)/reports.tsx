@@ -1,4 +1,4 @@
-import { useRouter } from 'expo-router';
+import { Redirect, useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -17,24 +17,31 @@ const RANGES: { value: ReportRange; label: string }[] = [
 ];
 
 export default function ReportsScreen() {
-  const { token } = useAuth();
+  const { user, token } = useAuth();
   const router = useRouter();
   const [range, setRange] = useState<ReportRange>('7');
   const [report, setReport] = useState<ReportsSummary | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [isExporting, setIsExporting] = useState<'csv' | 'pdf' | null>(null);
   const [exportError, setExportError] = useState<string | null>(null);
 
   const load = useCallback(() => {
     setIsLoading(true);
+    setLoadError(false);
     apiRequest<ReportsSummary>(`/admin/reports?range=${range}`, { token })
       .then(setReport)
+      .catch(() => setLoadError(true))
       .finally(() => setIsLoading(false));
   }, [token, range]);
 
   useEffect(() => {
     load();
   }, [load]);
+
+  if (user && user.user_type !== 'admin') {
+    return <Redirect href="/" />;
+  }
 
   async function handleExport(format: 'csv' | 'pdf') {
     setExportError(null);
@@ -81,7 +88,14 @@ export default function ReportsScreen() {
           ))}
         </View>
 
-        {isLoading || !report ? (
+        {loadError ? (
+          <View style={styles.errorBox}>
+            <Text style={styles.errorBoxText}>Couldn't load reports.</Text>
+            <Pressable onPress={load} style={styles.retryButton}>
+              <Text style={styles.retryButtonText}>Try again</Text>
+            </Pressable>
+          </View>
+        ) : isLoading || !report ? (
           <ActivityIndicator color={Brand.brand} style={{ marginTop: 20 }} />
         ) : (
           <ScrollView contentContainerStyle={styles.body}>
@@ -344,4 +358,22 @@ const styles = StyleSheet.create({
   },
   exportButtonGhostText: { color: Brand.brand, fontSize: 13, fontWeight: '500' },
   pressed: { opacity: 0.85 },
+  errorBox: {
+    marginHorizontal: 20,
+    backgroundColor: '#fff',
+    borderWidth: 0.5,
+    borderColor: Brand.border,
+    borderRadius: 14,
+    padding: 20,
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  errorBoxText: { fontSize: 12.5, color: Brand.text2, marginBottom: 12 },
+  retryButton: {
+    backgroundColor: Brand.brand,
+    borderRadius: 10,
+    paddingHorizontal: 18,
+    paddingVertical: 9,
+  },
+  retryButtonText: { fontSize: 12.5, fontWeight: '500', color: '#fff' },
 });

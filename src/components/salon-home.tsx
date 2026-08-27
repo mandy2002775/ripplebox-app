@@ -15,6 +15,7 @@ export function SalonHome({ user }: { user: User }) {
   const [dashboard, setDashboard] = useState<SalonDashboard | null>(null);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [pickingRewardFor, setPickingRewardFor] = useState<string | null>(null);
   const [isCompleting, setIsCompleting] = useState(false);
   const [completeError, setCompleteError] = useState<string | null>(null);
@@ -23,6 +24,7 @@ export function SalonHome({ user }: { user: User }) {
 
   const load = useCallback(() => {
     setIsLoading(true);
+    setLoadError(false);
     return Promise.all([
       apiRequest<SalonDashboard>('/salons/dashboard', { token }),
       apiRequest<NotificationsResponse>('/notifications', { token }),
@@ -31,6 +33,7 @@ export function SalonHome({ user }: { user: User }) {
         setDashboard(d);
         setUnreadCount(n.unread_count);
       })
+      .catch(() => setLoadError(true))
       .finally(() => setIsLoading(false));
   }, [token]);
 
@@ -96,7 +99,14 @@ export function SalonHome({ user }: { user: User }) {
         </View>
       </View>
 
-      {isLoading || !dashboard ? (
+      {loadError ? (
+        <View style={styles.errorBox}>
+          <Text style={styles.errorBoxText}>Couldn't load your dashboard.</Text>
+          <Pressable onPress={load} style={styles.retryButton}>
+            <Text style={styles.retryButtonText}>Try again</Text>
+          </Pressable>
+        </View>
+      ) : isLoading || !dashboard ? (
         <ActivityIndicator color={Brand.brand} style={{ marginTop: 20 }} />
       ) : (
         <>
@@ -387,4 +397,21 @@ const styles = StyleSheet.create({
     color: Brand.red,
     marginTop: 2,
   },
+  errorBox: {
+    backgroundColor: '#fff',
+    borderWidth: 0.5,
+    borderColor: Brand.border,
+    borderRadius: 14,
+    padding: 20,
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  errorBoxText: { fontSize: 12.5, color: Brand.text2, marginBottom: 12 },
+  retryButton: {
+    backgroundColor: Brand.brand,
+    borderRadius: 10,
+    paddingHorizontal: 18,
+    paddingVertical: 9,
+  },
+  retryButtonText: { fontSize: 12.5, fontWeight: '500', color: '#fff' },
 });

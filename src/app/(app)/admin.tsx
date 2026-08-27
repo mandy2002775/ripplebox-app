@@ -1,4 +1,4 @@
-import { useRouter, useFocusEffect } from 'expo-router';
+import { Redirect, useRouter, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -27,9 +27,11 @@ export default function AdminScreen() {
   const [subscriptions, setSubscriptions] = useState<AdminSubscriptionSummary[]>([]);
   const [leads, setLeads] = useState<SalonLead[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
 
   const load = useCallback(() => {
     setIsLoading(true);
+    setLoadError(false);
     return Promise.all([
       apiRequest<AdminStats>('/admin/stats', { token }),
       apiRequest<AdminSubscriptionSummary[]>('/admin/subscriptions', { token }),
@@ -40,10 +42,19 @@ export default function AdminScreen() {
         setSubscriptions(subs);
         setLeads(l);
       })
+      .catch(() => setLoadError(true))
       .finally(() => setIsLoading(false));
   }, [token]);
 
   useFocusEffect(useCallback(() => { load(); }, [load]));
+
+  // Only reachable via index.tsx's own redirect in normal use, but nothing
+  // stops a non-admin from deep-linking straight here — the API would 403
+  // them anyway, but this avoids that showing up as an unexplained stuck
+  // spinner.
+  if (user && user.user_type !== 'admin') {
+    return <Redirect href="/" />;
+  }
 
   return (
     <View style={styles.screen}>
@@ -58,7 +69,14 @@ export default function AdminScreen() {
           </View>
         </View>
 
-        {isLoading || !stats ? (
+        {loadError ? (
+          <View style={styles.errorBox}>
+            <Text style={styles.errorBoxText}>Couldn't load the admin panel.</Text>
+            <Pressable onPress={load} style={styles.retryButton}>
+              <Text style={styles.retryButtonText}>Try again</Text>
+            </Pressable>
+          </View>
+        ) : isLoading || !stats ? (
           <ActivityIndicator color="#fff" style={{ marginTop: 20 }} />
         ) : (
           <View style={styles.statGrid}>
@@ -315,4 +333,19 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: Brand.brand,
   },
+  errorBox: {
+    marginHorizontal: 20,
+    backgroundColor: 'rgba(255,255,255,0.07)',
+    borderRadius: 14,
+    padding: 20,
+    alignItems: 'center',
+  },
+  errorBoxText: { fontSize: 12.5, color: '#fff', marginBottom: 12 },
+  retryButton: {
+    backgroundColor: '#8ee8c8',
+    borderRadius: 10,
+    paddingHorizontal: 18,
+    paddingVertical: 9,
+  },
+  retryButtonText: { fontSize: 12.5, fontWeight: '500', color: Brand.brand },
 });

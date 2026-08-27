@@ -16,10 +16,17 @@ const COLORS: Record<ReferralStatus, { bg: string; text: string }> = {
 };
 
 export function StatusBadge({ status }: { status: ReferralStatus }) {
-  const colors = COLORS[status];
+  // Falls back rather than crashing if the backend ever sends a status this
+  // build doesn't know about yet (a real risk during active development,
+  // where frontend and backend don't always deploy in lockstep) — this
+  // renders inline inside a scrollable list, so one bad value shouldn't take
+  // the whole screen down with it.
+  const colors = COLORS[status] ?? { bg: Brand.lavender, text: Brand.text2 };
+  const label = LABELS[status] ?? status;
+
   return (
     <View style={[styles.badge, { backgroundColor: colors.bg }]}>
-      <Text style={[styles.text, { color: colors.text }]}>{LABELS[status]}</Text>
+      <Text style={[styles.text, { color: colors.text }]}>{label}</Text>
     </View>
   );
 }
