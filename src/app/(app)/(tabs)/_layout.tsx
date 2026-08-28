@@ -78,7 +78,6 @@ export default function TabsLayout() {
             title: 'Discover',
             tabBarIcon: ({ color }) => <TabIcon label="🔍" color={color} />,
           }}
-          listeners={disabledListeners}
         />
         <Tabs.Screen
           name="refer"
@@ -86,7 +85,6 @@ export default function TabsLayout() {
             title: 'Refer',
             tabBarIcon: ({ color }) => <TabIcon label="📤" color={color} />,
           }}
-          listeners={disabledListeners}
         />
         <Tabs.Screen
           name="client-rewards"
@@ -94,7 +92,6 @@ export default function TabsLayout() {
             title: 'Rewards',
             tabBarIcon: ({ color }) => <TabIcon label="🎁" color={color} />,
           }}
-          listeners={disabledListeners}
         />
       </Tabs.Protected>
 

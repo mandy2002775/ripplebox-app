@@ -1,38 +1,21 @@
 import * as Clipboard from 'expo-clipboard';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
-import {
-  ActivityIndicator,
-  Image,
-  Linking,
-  Pressable,
-  ScrollView,
-  Share,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
+import { ActivityIndicator, Linking, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
 
-import { RowButton } from '@/components/row-button';
 import { StatusBadge } from '@/components/status-badge';
 import { Brand } from '@/constants/theme';
 import { useAuth } from '@/contexts/auth-context';
-import { apiRequest, ApiError } from '@/lib/api';
-import { ClientDashboard, NotificationsResponse, SalonSummary, User } from '@/lib/types';
+import { apiRequest } from '@/lib/api';
+import { ClientDashboard, NotificationsResponse, User } from '@/lib/types';
 
 export function ClientHome({ user }: { user: User }) {
   const { token } = useAuth();
   const router = useRouter();
   const [dashboard, setDashboard] = useState<ClientDashboard | null>(null);
-  const [salons, setSalons] = useState<SalonSummary[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
-  const [selectedSalonId, setSelectedSalonId] = useState<string | null>(null);
-  const [redeemCode, setRedeemCode] = useState('');
-  const [isRedeeming, setIsRedeeming] = useState(false);
-  const [message, setMessage] = useState<{ text: string; isError: boolean } | null>(null);
   const [isCopied, setIsCopied] = useState(false);
 
   const load = useCallback(() => {
@@ -40,12 +23,10 @@ export function ClientHome({ user }: { user: User }) {
     setLoadError(false);
     Promise.all([
       apiRequest<ClientDashboard>('/clients/dashboard', { token }),
-      apiRequest<SalonSummary[]>('/salons', { token }),
       apiRequest<NotificationsResponse>('/notifications', { token }),
     ])
-      .then(([d, s, n]) => {
+      .then(([d, n]) => {
         setDashboard(d);
-        setSalons(s);
         setUnreadCount(n.unread_count);
       })
       .catch(() => setLoadError(true))
@@ -84,30 +65,6 @@ export function ClientHome({ user }: { user: User }) {
       // Clipboard access can be denied by the platform (e.g. an embedded
       // webview without clipboard permission) — the code is already
       // visible on screen to copy manually, so just leave the button as is.
-    }
-  }
-
-  async function handleRedeem() {
-    if (!selectedSalonId || !redeemCode.trim()) return;
-    setMessage(null);
-    setIsRedeeming(true);
-    try {
-      await apiRequest('/referrals', {
-        method: 'POST',
-        token,
-        body: { referral_code: redeemCode.trim(), salon_id: selectedSalonId },
-      });
-      setMessage({ text: 'Code redeemed! Your referral is now pending.', isError: false });
-      setRedeemCode('');
-      setSelectedSalonId(null);
-      load();
-    } catch (e) {
-      setMessage({
-        text: e instanceof ApiError ? e.message : 'Could not redeem that code.',
-        isError: true,
-      });
-    } finally {
-      setIsRedeeming(false);
     }
   }
 
@@ -175,79 +132,33 @@ export function ClientHome({ user }: { user: User }) {
             </View>
           </View>
 
-          {dashboard.referrals.length > 0 && (
-            <>
-              <Text style={styles.sectionLabel}>My referrals</Text>
-              {dashboard.referrals.map((r) => (
-                <View key={r.id} style={styles.row}>
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.rowTitle}>{r.referred_name}</Text>
-                    <Text style={styles.rowSub}>{r.salon_name}</Text>
-                  </View>
-                  <StatusBadge status={r.status} />
-                </View>
-              ))}
-            </>
-          )}
-
-          {dashboard.redemptions.length > 0 && (
-            <>
-              <Text style={styles.sectionLabel}>My rewards</Text>
-              {dashboard.redemptions.map((r) => (
-                <View key={r.id} style={styles.row}>
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.rowTitle}>{r.description}</Text>
-                    <Text style={styles.rowSub}>{r.salon_name}</Text>
-                  </View>
-                </View>
-              ))}
-            </>
-          )}
-
-          <Text style={styles.sectionLabel}>Redeem a friend's code</Text>
-          <Text style={styles.sectionHint}>
-            Pick the salon you're visiting, then enter the code they gave you.
-          </Text>
-
-          {salons.map((s) => (
-            <Pressable
-              key={s.id}
-              onPress={() => setSelectedSalonId(s.id)}
-              style={[styles.salonRow, selectedSalonId === s.id && styles.salonRowSelected]}>
-              {s.logo_url && <Image source={{ uri: s.logo_url }} style={styles.salonLogo} />}
-              <View style={{ flex: 1 }}>
-                <Text style={styles.rowTitle}>{s.business_name}</Text>
-                <Text style={styles.rowSub}>
-                  {s.location}
-                  {s.top_reward ? ` • ${s.top_reward}` : ''}
-                </Text>
-              </View>
-              {selectedSalonId === s.id && <Text style={styles.selectedMark}>✓</Text>}
+          <View style={styles.sectionHeaderRow}>
+            <Text style={styles.sectionLabel}>Recent referrals</Text>
+            <Pressable onPress={() => router.push('/refer')}>
+              <Text style={styles.seeAll}>See all →</Text>
             </Pressable>
-          ))}
-
-          {selectedSalonId && (
-            <View style={styles.redeemBox}>
-              <TextInput
-                style={styles.input}
-                value={redeemCode}
-                onChangeText={setRedeemCode}
-                placeholder="Friend's referral code"
-                placeholderTextColor={Brand.text3}
-                autoCapitalize="characters"
-              />
-              {message && (
-                <Text style={message.isError ? styles.error : styles.success}>
-                  {message.text}
-                </Text>
-              )}
-              <RowButton
-                label={isRedeeming ? 'Redeeming…' : 'Redeem code'}
-                onPress={handleRedeem}
-                disabled={isRedeeming || !redeemCode.trim()}
-              />
-            </View>
+          </View>
+          {dashboard.referrals.length === 0 ? (
+            <Text style={styles.emptyText}>No referrals yet — share your code to get started.</Text>
+          ) : (
+            dashboard.referrals.slice(0, 3).map((r) => (
+              <View key={r.id} style={styles.row}>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.rowTitle}>{r.referred_name}</Text>
+                  <Text style={styles.rowSub}>{r.salon_name}</Text>
+                </View>
+                <StatusBadge status={r.status} />
+              </View>
+            ))
           )}
+
+          <Pressable onPress={() => router.push('/discover')} style={styles.discoverCard}>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.discoverTitle}>Got a friend's code?</Text>
+              <Text style={styles.discoverSub}>Find their salon and redeem it in Discover</Text>
+            </View>
+            <Text style={styles.discoverArrow}>→</Text>
+          </Pressable>
         </>
       )}
     </ScrollView>
@@ -344,16 +255,26 @@ const styles = StyleSheet.create({
   },
   statNumber: { fontSize: 19, fontWeight: '500', color: Brand.brand },
   statLabel: { fontSize: 9, color: Brand.text3, marginTop: 2 },
+  sectionHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 16,
+    marginBottom: 4,
+  },
   sectionLabel: {
     fontSize: 10,
     fontWeight: '500',
     color: Brand.text3,
     letterSpacing: 0.5,
     textTransform: 'uppercase',
-    marginTop: 16,
-    marginBottom: 4,
   },
-  sectionHint: { fontSize: 11.5, color: Brand.text2, marginBottom: 8, lineHeight: 16 },
+  seeAll: {
+    fontSize: 11,
+    fontWeight: '500',
+    color: Brand.accent,
+  },
+  emptyText: { fontSize: 12, color: Brand.text3, marginTop: 4 },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -367,48 +288,17 @@ const styles = StyleSheet.create({
   },
   rowTitle: { fontSize: 12.5, fontWeight: '500', color: Brand.brand },
   rowSub: { fontSize: 11, color: Brand.text2, marginTop: 1 },
-  salonRow: {
+  discoverCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
-    backgroundColor: '#fff',
-    borderWidth: 0.5,
-    borderColor: Brand.border,
-    borderRadius: 14,
-    padding: 12,
-    marginBottom: 7,
+    backgroundColor: Brand.brand,
+    borderRadius: 16,
+    padding: 16,
+    marginTop: 18,
   },
-  salonRowSelected: {
-    borderWidth: 1.5,
-    borderColor: Brand.brand,
-    backgroundColor: Brand.lavender,
-  },
-  salonLogo: {
-    width: 34,
-    height: 34,
-    borderRadius: 10,
-    backgroundColor: Brand.lavender,
-  },
-  selectedMark: { color: Brand.brand, fontWeight: '700' },
-  redeemBox: {
-    backgroundColor: '#fff',
-    borderWidth: 0.5,
-    borderColor: Brand.border,
-    borderRadius: 14,
-    padding: 14,
-    marginTop: 4,
-  },
-  input: {
-    backgroundColor: Brand.lavender,
-    borderRadius: 11,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    fontSize: 14,
-    color: Brand.brand,
-    marginBottom: 10,
-  },
-  error: { fontSize: 12, color: Brand.red, marginBottom: 8 },
-  success: { fontSize: 12, color: Brand.green, marginBottom: 8 },
+  discoverTitle: { fontSize: 13.5, fontWeight: '500', color: '#fff', marginBottom: 2 },
+  discoverSub: { fontSize: 11, color: 'rgba(255,255,255,0.7)' },
+  discoverArrow: { fontSize: 18, color: '#fff', marginLeft: 10 },
   errorBox: {
     backgroundColor: '#fff',
     borderWidth: 0.5,
