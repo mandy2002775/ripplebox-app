@@ -60,6 +60,39 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
 }
 
 /**
+ * For endpoints that take a file upload (multipart/form-data) rather than
+ * JSON — fetch sets its own Content-Type boundary for FormData, so it must
+ * not be set manually here.
+ */
+export async function apiUploadRequest<T>(
+  path: string,
+  form: FormData,
+  token?: string | null
+): Promise<T> {
+  const response = await fetch(`${BASE_URL}${path}`, {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: form,
+  });
+
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    handleUnauthorized(response.status, !!token);
+    throw new ApiError(
+      response.status,
+      data?.message ?? 'Something went wrong. Please try again.',
+      data?.errors
+    );
+  }
+
+  return data as T;
+}
+
+/**
  * For endpoints that return a file (CSV/PDF export) rather than JSON.
  */
 export async function apiBlobRequest(path: string, token?: string | null): Promise<Blob> {

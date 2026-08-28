@@ -1,5 +1,5 @@
 import { useFocusEffect } from 'expo-router';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Image,
@@ -16,7 +16,7 @@ import { RowButton } from '@/components/row-button';
 import { Brand } from '@/constants/theme';
 import { useAuth } from '@/contexts/auth-context';
 import { apiRequest, ApiError } from '@/lib/api';
-import { SalonSummary } from '@/lib/types';
+import { SalonContentPost, SalonSummary } from '@/lib/types';
 
 export default function DiscoverScreen() {
   const { token } = useAuth();
@@ -30,6 +30,9 @@ export default function DiscoverScreen() {
   const [isRedeeming, setIsRedeeming] = useState(false);
   const [message, setMessage] = useState<{ text: string; isError: boolean } | null>(null);
 
+  const [content, setContent] = useState<SalonContentPost[]>([]);
+  const [isLoadingContent, setIsLoadingContent] = useState(false);
+
   const load = useCallback(() => {
     setIsLoading(true);
     setLoadError(false);
@@ -40,6 +43,43 @@ export default function DiscoverScreen() {
   }, [token]);
 
   useFocusEffect(useCallback(() => load(), [load]));
+
+  useEffect(() => {
+    if (!selectedSalonId) {
+      setContent([]);
+      return;
+    }
+    setIsLoadingContent(true);
+    apiRequest<SalonContentPost[]>(`/salons/${selectedSalonId}/content`, { token })
+      .then(setContent)
+      .catch(() => setContent([]))
+      .finally(() => setIsLoadingContent(false));
+  }, [selectedSalonId, token]);
+
+  async function toggleLike(post: SalonContentPost) {
+    setContent((prev) =>
+      prev.map((p) =>
+        p.id === post.id
+          ? { ...p, liked_by_me: !p.liked_by_me, likes_count: p.likes_count + (p.liked_by_me ? -1 : 1) }
+          : p
+      )
+    );
+    try {
+      await apiRequest<{ liked: boolean; likes_count: number }>(`/content/${post.id}/like`, {
+        method: 'POST',
+        token,
+      });
+    } catch {
+      // Roll back on failure — the request already reflects the pre-tap state.
+      setContent((prev) =>
+        prev.map((p) =>
+          p.id === post.id
+            ? { ...p, liked_by_me: post.liked_by_me, likes_count: post.likes_count }
+            : p
+        )
+      );
+    }
+  }
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -131,6 +171,32 @@ export default function DiscoverScreen() {
 
                 {selectedSalonId === s.id && (
                   <View style={styles.redeemBox}>
+                    {isLoadingContent ? (
+                      <ActivityIndicator color={Brand.brand} style={{ marginBottom: 10 }} />
+                    ) : (
+                      content.length > 0 && (
+                        <ScrollView
+                          horizontal
+                          showsHorizontalScrollIndicator={false}
+                          style={styles.contentStrip}
+                          contentContainerStyle={{ gap: 8 }}>
+                          {content.map((post) => (
+                            <View key={post.id} style={styles.contentItem}>
+                              <Image
+                                source={{ uri: post.image_url, headers: { Authorization: `Bearer ${token}` } }}
+                                style={styles.contentImage}
+                              />
+                              <Pressable onPress={() => toggleLike(post)} style={styles.likeButton}>
+                                <Text style={styles.likeButtonText}>
+                                  {post.liked_by_me ? '❤️' : '🤍'} {post.likes_count}
+                                </Text>
+                              </Pressable>
+                            </View>
+                          ))}
+                        </ScrollView>
+                      )
+                    )}
+
                     <Text style={styles.redeemLabel}>Redeem a code at {s.business_name}</Text>
                     <TextInput
                       style={styles.input}
@@ -228,6 +294,16 @@ const styles = StyleSheet.create({
     marginBottom: 7,
   },
   redeemLabel: { fontSize: 11.5, fontWeight: '500', color: Brand.brand3, marginBottom: 8 },
+  contentStrip: { marginBottom: 12 },
+  contentItem: { width: 100 },
+  contentImage: {
+    width: 100,
+    height: 100,
+    borderRadius: 10,
+    backgroundColor: Brand.lavender,
+  },
+  likeButton: { marginTop: 4, alignSelf: 'flex-start' },
+  likeButtonText: { fontSize: 11, color: Brand.text2 },
   input: {
     backgroundColor: Brand.lavender,
     borderRadius: 11,

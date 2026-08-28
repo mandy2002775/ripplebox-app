@@ -81,6 +81,26 @@ export type SalonSummary = {
   top_reward: string | null;
 };
 
+export type ContentPost = {
+  id: string;
+  image_url: string;
+  caption: string | null;
+  likes_count: number;
+  created_at: string;
+};
+
+export type SalonContentPost = ContentPost & {
+  liked_by_me: boolean;
+};
+
+export type SalonClientSummary = {
+  id: string;
+  name: string;
+  referrals_made: number;
+  is_customer: boolean;
+  last_activity: string;
+};
+
 export type MyRedemption = {
   id: string;
   description: string;

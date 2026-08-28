@@ -4,12 +4,6 @@ import { ColorValue, Text } from 'react-native';
 import { Brand } from '@/constants/theme';
 import { useAuth } from '@/contexts/auth-context';
 
-// Prevents navigation entirely — used for tabs that are visible (matching
-// the prototype's nav bar) but have no real screen behind them yet.
-const disabledListeners = () => ({
-  tabPress: (e: { preventDefault: () => void }) => e.preventDefault(),
-});
-
 function TabIcon({ label, color }: { label: string; color: ColorValue }) {
   return (
     <Text style={{ fontSize: 19, color, opacity: color === Brand.text3 ? 0.5 : 1 }}>{label}</Text>
@@ -52,7 +46,6 @@ export default function TabsLayout() {
             title: 'Clients',
             tabBarIcon: ({ color }) => <TabIcon label="👥" color={color} />,
           }}
-          listeners={disabledListeners}
         />
         <Tabs.Screen
           name="rewards"
@@ -67,7 +60,6 @@ export default function TabsLayout() {
             title: 'Content',
             tabBarIcon: ({ color }) => <TabIcon label="🖼️" color={color} />,
           }}
-          listeners={disabledListeners}
         />
       </Tabs.Protected>
 

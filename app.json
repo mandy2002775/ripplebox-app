@@ -40,7 +40,13 @@
       ],
       "expo-secure-store",
       "expo-image",
-      "expo-sharing"
+      "expo-sharing",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Ripplebox needs access to your photos to post salon content."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
