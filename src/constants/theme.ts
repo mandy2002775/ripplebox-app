@@ -82,4 +82,8 @@ export const Spacing = {
 } as const;
 
 export const BottomTabInset = Platform.select({ ios: 50, android: 80 }) ?? 0;
-export const MaxContentWidth = 800;
+
+/** Caps the app's width on web so it reads as an app, not a phone screen
+ *  stretched across a desktop browser — matches how WhatsApp Web/Telegram
+ *  Web frame a mobile-first layout on wide viewports. */
+export const MaxContentWidth = 480;
