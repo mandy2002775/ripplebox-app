@@ -1,3 +1,15 @@
+import {
+  Fraunces_500Medium_Italic,
+  Fraunces_600SemiBold,
+  Fraunces_700Bold,
+} from '@expo-google-fonts/fraunces';
+import {
+  Inter_400Regular,
+  Inter_500Medium,
+  Inter_600SemiBold,
+  Inter_700Bold,
+  useFonts,
+} from '@expo-google-fonts/inter';
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { Platform, StyleSheet, useColorScheme, View } from 'react-native';
@@ -10,10 +22,20 @@ SplashScreen.preventAutoHideAsync();
 
 function RootNavigator() {
   const { user, isLoading } = useAuth();
+  const [fontsLoaded] = useFonts({
+    Fraunces_600SemiBold,
+    Fraunces_700Bold,
+    Fraunces_500Medium_Italic,
+    Inter_400Regular,
+    Inter_500Medium,
+    Inter_600SemiBold,
+    Inter_700Bold,
+  });
 
-  // Keep the native splash screen up while we check for a stored session —
-  // otherwise we'd flash the auth screens before redirecting a logged-in user.
-  if (isLoading) return null;
+  // Keep the native splash screen up while we check for a stored session and
+  // load the brand typeface — otherwise we'd flash unstyled system-font
+  // auth screens before everything's ready.
+  if (isLoading || !fontsLoaded) return null;
 
   return (
     <>

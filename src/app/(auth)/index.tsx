@@ -1,8 +1,9 @@
+import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { Linking, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Brand } from '@/constants/theme';
+import { Radius, Type } from '@/constants/theme';
 import { useAuth } from '@/contexts/auth-context';
 
 const TERMS_URL = 'https://claude.ai/code/artifact/b812c43a-a284-488c-872b-ca1f293eb17d';
@@ -14,19 +15,32 @@ export default function WelcomeScreen() {
 
   return (
     <View style={styles.screen}>
-      <SafeAreaView style={styles.safeArea}>
-        <View style={styles.logoRing1}>
-          <View style={styles.logoRing2}>
-            <View style={styles.logoRing3}>
-              <Text style={styles.logoLetter}>R</Text>
-            </View>
-          </View>
-        </View>
+      <LinearGradient
+        colors={['#2E1152', '#1C0A3A', '#0F0519']}
+        start={{ x: 0.15, y: 0 }}
+        end={{ x: 0.85, y: 1 }}
+        style={StyleSheet.absoluteFill}
+      />
+      <View pointerEvents="none" style={styles.glowRose} />
+      <View pointerEvents="none" style={styles.glowGold} />
 
-        <Text style={styles.title}>Ripplebox</Text>
-        <Text style={styles.tagline}>
-          creating the ripple effect of referrals{'\n'}for hair and beauty
-        </Text>
+      <SafeAreaView style={styles.safeArea}>
+        <View style={styles.hero}>
+          <LinearGradient
+            colors={['#FF6F91', '#7B4FCC']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.logoMark}>
+            <Text style={styles.logoLetter}>R</Text>
+          </LinearGradient>
+
+          <Text style={styles.title}>
+            Ripple<Text style={styles.titleItalic}>box</Text>
+          </Text>
+          <Text style={styles.tagline}>
+            The ripple effect of referrals,{'\n'}for hair &amp; beauty.
+          </Text>
+        </View>
 
         {sessionExpired && (
           <View style={styles.sessionExpiredBanner}>
@@ -37,10 +51,16 @@ export default function WelcomeScreen() {
         )}
 
         <View style={styles.actions}>
-          <Pressable
-            onPress={() => router.push('/role-select')}
-            style={({ pressed }) => [styles.primaryButton, pressed && styles.pressed]}>
-            <Text style={styles.primaryButtonText}>Get started</Text>
+          <Pressable onPress={() => router.push('/role-select')}>
+            {({ pressed }) => (
+              <LinearGradient
+                colors={['#FF6F91', '#8A5CF5']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={[styles.primaryButton, pressed && styles.pressed]}>
+                <Text style={styles.primaryButtonText}>Get started</Text>
+              </LinearGradient>
+            )}
           </Pressable>
 
           <Pressable
@@ -68,66 +88,80 @@ export default function WelcomeScreen() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: Brand.brand,
+    backgroundColor: '#1C0A3A',
+    overflow: 'hidden',
+  },
+  glowRose: {
+    position: 'absolute',
+    width: 340,
+    height: 340,
+    borderRadius: 170,
+    backgroundColor: '#FF6F91',
+    opacity: 0.16,
+    top: -100,
+    right: -110,
+  },
+  glowGold: {
+    position: 'absolute',
+    width: 260,
+    height: 260,
+    borderRadius: 130,
+    backgroundColor: '#FFC978',
+    opacity: 0.08,
+    bottom: 40,
+    left: -100,
   },
   safeArea: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 28,
+    paddingHorizontal: 30,
   },
-  logoRing1: {
-    width: 96,
-    height: 96,
-    borderRadius: 48,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.12)',
+  hero: {
+    alignItems: 'center',
+    marginBottom: 56,
+  },
+  logoMark: {
+    width: 72,
+    height: 72,
+    borderRadius: 24,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 20,
-  },
-  logoRing2: {
-    width: 74,
-    height: 74,
-    borderRadius: 37,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.2)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  logoRing3: {
-    width: 54,
-    height: 54,
-    borderRadius: 27,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.35)',
-    alignItems: 'center',
-    justifyContent: 'center',
+    marginBottom: 26,
+    shadowColor: '#FF6F91',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.45,
+    shadowRadius: 24,
+    elevation: 10,
   },
   logoLetter: {
-    fontSize: 22,
+    fontSize: 30,
     color: '#fff',
-    fontWeight: '300',
+    fontFamily: Type.display,
   },
   title: {
-    fontSize: 27,
-    fontWeight: '500',
+    fontSize: 36,
     color: '#fff',
     letterSpacing: -0.5,
-    marginBottom: 5,
+    marginBottom: 12,
+    fontFamily: Type.displayBold,
+  },
+  titleItalic: {
+    fontFamily: Type.displayItalic,
+    color: '#E8B8FF',
   },
   tagline: {
-    fontSize: 13,
-    color: '#8060B0',
+    fontSize: 14.5,
+    color: 'rgba(232,216,255,0.62)',
     textAlign: 'center',
-    lineHeight: 20,
-    marginBottom: 48,
+    lineHeight: 22,
+    fontFamily: Type.body,
   },
   sessionExpiredBanner: {
     backgroundColor: 'rgba(255,255,255,0.08)',
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.15)',
-    borderRadius: 12,
+    borderRadius: Radius.sm,
     paddingVertical: 10,
     paddingHorizontal: 14,
     marginBottom: 20,
@@ -137,48 +171,52 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: 'rgba(255,255,255,0.85)',
     textAlign: 'center',
+    fontFamily: Type.bodyMedium,
   },
   actions: {
     width: '100%',
-    gap: 10,
+    gap: 12,
   },
   primaryButton: {
-    backgroundColor: 'rgba(255,255,255,0.13)',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.22)',
-    borderRadius: 14,
-    paddingVertical: 14,
+    borderRadius: Radius.pill,
+    paddingVertical: 16,
     alignItems: 'center',
+    shadowColor: '#FF6F91',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.35,
+    shadowRadius: 20,
+    elevation: 8,
   },
   primaryButtonText: {
     color: '#fff',
-    fontSize: 14,
-    fontWeight: '500',
+    fontSize: 15,
+    fontFamily: Type.bodySemiBold,
   },
   ghostButton: {
     borderWidth: 1.5,
-    borderColor: 'rgba(255,255,255,0.18)',
-    borderRadius: 14,
-    paddingVertical: 12,
+    borderColor: 'rgba(255,255,255,0.16)',
+    borderRadius: Radius.pill,
+    paddingVertical: 14.5,
     alignItems: 'center',
   },
   ghostButtonText: {
-    color: 'rgba(255,255,255,0.65)',
-    fontSize: 14,
-    fontWeight: '500',
+    color: 'rgba(255,255,255,0.7)',
+    fontSize: 14.5,
+    fontFamily: Type.bodyMedium,
   },
   pressed: {
-    opacity: 0.75,
+    opacity: 0.85,
   },
   legal: {
-    marginTop: 22,
-    fontSize: 10,
-    color: '#6040A0',
+    marginTop: 26,
+    fontSize: 10.5,
+    color: 'rgba(255,255,255,0.28)',
     textAlign: 'center',
-    lineHeight: 16,
+    lineHeight: 17,
+    fontFamily: Type.body,
   },
   legalLink: {
-    color: '#9070C0',
+    color: 'rgba(255,255,255,0.5)',
     textDecorationLine: 'underline',
   },
 });

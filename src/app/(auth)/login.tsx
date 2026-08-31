@@ -1,3 +1,5 @@
+import { Feather } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
@@ -10,7 +12,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Brand } from '@/constants/theme';
+import { Brand, Radius, Shadow, Type } from '@/constants/theme';
 import { useAuth } from '@/contexts/auth-context';
 import { ApiError } from '@/lib/api';
 import { UserType } from '@/lib/types';
@@ -62,13 +64,16 @@ export default function LoginScreen() {
     }
   }
 
+  const canSend = phoneNumber.trim().length >= 8;
+  const canVerify = code.trim().length === 6;
+
   return (
     <View style={styles.screen}>
       <SafeAreaView style={styles.safeArea}>
         <Pressable
           onPress={() => (stage === 'code' ? setStage('phone') : router.back())}
           style={styles.backButton}>
-          <Text style={styles.backButtonText}>{'‹'}</Text>
+          <Feather name="chevron-left" size={19} color={Brand.brand} />
         </Pressable>
 
         <Text style={styles.heading}>
@@ -92,25 +97,33 @@ export default function LoginScreen() {
               autoFocus
             />
             {error && <Text style={styles.error}>{error}</Text>}
-            <Pressable
-              disabled={isSubmitting || phoneNumber.trim().length < 8}
-              onPress={handleSendCode}
-              style={({ pressed }) => [
-                styles.button,
-                (pressed || isSubmitting) && styles.pressed,
-                phoneNumber.trim().length < 8 && styles.buttonDisabled,
-              ]}>
-              {isSubmitting ? (
-                <ActivityIndicator color="#fff" />
-              ) : (
-                <Text style={styles.buttonText}>Send code</Text>
-              )}
+            <Pressable disabled={isSubmitting || !canSend} onPress={handleSendCode}>
+              {({ pressed }) =>
+                canSend ? (
+                  <LinearGradient
+                    colors={[Brand.roseVivid, Brand.accent]}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 0 }}
+                    style={[styles.button, (pressed || isSubmitting) && styles.pressed]}>
+                    {isSubmitting ? (
+                      <ActivityIndicator color="#fff" />
+                    ) : (
+                      <Text style={styles.buttonText}>Send code</Text>
+                    )}
+                  </LinearGradient>
+                ) : (
+                  <View style={[styles.button, styles.buttonDisabled]}>
+                    <Text style={styles.buttonTextDisabled}>Send code</Text>
+                  </View>
+                )
+              }
             </Pressable>
           </>
         ) : (
           <>
             {debugCode && (
               <View style={styles.debugBox}>
+                <Feather name="zap" size={13} color={Brand.amber} />
                 <Text style={styles.debugText}>Dev mode — your code is {debugCode}</Text>
               </View>
             )}
@@ -133,19 +146,26 @@ export default function LoginScreen() {
               placeholderTextColor={Brand.text3}
             />
             {error && <Text style={styles.error}>{error}</Text>}
-            <Pressable
-              disabled={isSubmitting || code.trim().length !== 6}
-              onPress={handleVerify}
-              style={({ pressed }) => [
-                styles.button,
-                (pressed || isSubmitting) && styles.pressed,
-                code.trim().length !== 6 && styles.buttonDisabled,
-              ]}>
-              {isSubmitting ? (
-                <ActivityIndicator color="#fff" />
-              ) : (
-                <Text style={styles.buttonText}>Continue</Text>
-              )}
+            <Pressable disabled={isSubmitting || !canVerify} onPress={handleVerify}>
+              {({ pressed }) =>
+                canVerify ? (
+                  <LinearGradient
+                    colors={[Brand.roseVivid, Brand.accent]}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 0 }}
+                    style={[styles.button, (pressed || isSubmitting) && styles.pressed]}>
+                    {isSubmitting ? (
+                      <ActivityIndicator color="#fff" />
+                    ) : (
+                      <Text style={styles.buttonText}>Continue</Text>
+                    )}
+                  </LinearGradient>
+                ) : (
+                  <View style={[styles.button, styles.buttonDisabled]}>
+                    <Text style={styles.buttonTextDisabled}>Continue</Text>
+                  </View>
+                )
+              }
             </Pressable>
           </>
         )}
@@ -161,84 +181,94 @@ const styles = StyleSheet.create({
   },
   safeArea: {
     flex: 1,
-    paddingHorizontal: 20,
-    paddingTop: 12,
+    paddingHorizontal: 22,
+    paddingTop: 14,
   },
   backButton: {
-    width: 30,
-    height: 30,
-    borderRadius: 8,
-    backgroundColor: '#fff',
-    borderWidth: 0.5,
-    borderColor: Brand.border,
+    width: 34,
+    height: 34,
+    borderRadius: Radius.sm,
+    backgroundColor: Brand.surface,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 16,
-  },
-  backButtonText: {
-    fontSize: 18,
-    color: Brand.brand,
-    marginTop: -2,
+    marginBottom: 22,
+    ...Shadow.sm,
   },
   heading: {
-    fontSize: 21,
-    fontWeight: '500',
+    fontSize: 23,
     color: Brand.brand,
-    marginBottom: 4,
+    marginBottom: 6,
+    fontFamily: Type.displayBold,
+    letterSpacing: -0.2,
   },
   subheading: {
-    fontSize: 12,
+    fontSize: 12.5,
     color: Brand.text2,
-    marginBottom: 18,
+    marginBottom: 22,
+    fontFamily: Type.body,
   },
   fieldLabel: {
     fontSize: 11,
-    fontWeight: '500',
     color: Brand.accent,
-    marginBottom: 5,
-    marginTop: 4,
+    marginBottom: 6,
+    marginTop: 2,
+    fontFamily: Type.bodySemiBold,
   },
   input: {
-    backgroundColor: Brand.lavender,
-    borderRadius: 11,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
+    backgroundColor: Brand.surface,
+    borderRadius: Radius.sm,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
     fontSize: 15,
     color: Brand.brand,
-    marginBottom: 9,
+    marginBottom: 11,
+    fontFamily: Type.bodyMedium,
+    ...Shadow.sm,
   },
   debugBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 7,
     backgroundColor: Brand.amberBg,
-    borderRadius: 11,
-    padding: 11,
-    marginBottom: 12,
+    borderRadius: Radius.sm,
+    padding: 12,
+    marginBottom: 14,
   },
   debugText: {
     fontSize: 12,
     color: Brand.amber,
-    fontWeight: '500',
+    fontFamily: Type.bodyMedium,
   },
   error: {
     fontSize: 12,
     color: Brand.red,
     marginBottom: 10,
+    fontFamily: Type.body,
   },
   button: {
-    backgroundColor: Brand.brand,
-    borderRadius: 14,
-    paddingVertical: 14,
+    borderRadius: Radius.pill,
+    paddingVertical: 15.5,
     alignItems: 'center',
-    marginTop: 6,
+    marginTop: 8,
+    ...Shadow.md,
+    shadowColor: Brand.accent,
   },
   buttonDisabled: {
-    opacity: 0.4,
+    backgroundColor: Brand.border,
+    shadowOpacity: 0,
+    elevation: 0,
   },
   buttonText: {
     color: '#fff',
-    fontSize: 14,
-    fontWeight: '500',
+    fontSize: 14.5,
+    fontFamily: Type.bodySemiBold,
+  },
+  buttonTextDisabled: {
+    color: Brand.text3,
+    fontSize: 14.5,
+    fontFamily: Type.bodySemiBold,
   },
   pressed: {
-    opacity: 0.85,
+    opacity: 0.88,
   },
 });

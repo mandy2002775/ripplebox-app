@@ -1,6 +1,7 @@
+import { LinearGradient } from 'expo-linear-gradient';
 import { Pressable, StyleSheet, Text } from 'react-native';
 
-import { Brand } from '@/constants/theme';
+import { Brand, Radius, Shadow, Type } from '@/constants/theme';
 
 type Props = {
   label: string;
@@ -11,29 +12,49 @@ type Props = {
 
 export function RowButton({ label, onPress, variant = 'primary', disabled }: Props) {
   const isGhost = variant === 'ghost';
+
+  if (isGhost) {
+    return (
+      <Pressable
+        disabled={disabled}
+        onPress={onPress}
+        style={({ pressed }) => [
+          styles.base,
+          styles.ghost,
+          (pressed || disabled) && styles.pressed,
+        ]}>
+        <Text style={[styles.text, styles.textGhost]}>{label}</Text>
+      </Pressable>
+    );
+  }
+
   return (
-    <Pressable
-      disabled={disabled}
-      onPress={onPress}
-      style={({ pressed }) => [
-        styles.base,
-        isGhost ? styles.ghost : styles.primary,
-        (pressed || disabled) && styles.pressed,
-      ]}>
-      <Text style={[styles.text, isGhost ? styles.textGhost : styles.textPrimary]}>{label}</Text>
+    <Pressable disabled={disabled} onPress={onPress}>
+      {({ pressed }) => (
+        <LinearGradient
+          colors={disabled ? [Brand.border, Brand.border] : [Brand.roseVivid, Brand.accent]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={[styles.base, styles.primary, pressed && styles.pressed]}>
+          <Text style={[styles.text, disabled ? styles.textDisabled : styles.textPrimary]}>
+            {label}
+          </Text>
+        </LinearGradient>
+      )}
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
   base: {
-    borderRadius: 14,
-    paddingVertical: 13,
+    borderRadius: Radius.pill,
+    paddingVertical: 14,
     alignItems: 'center',
     marginTop: 8,
   },
   primary: {
-    backgroundColor: Brand.brand,
+    ...Shadow.md,
+    shadowColor: Brand.accent,
   },
   ghost: {
     borderWidth: 1.5,
@@ -41,15 +62,18 @@ const styles = StyleSheet.create({
   },
   text: {
     fontSize: 14,
-    fontWeight: '500',
+    fontFamily: Type.bodySemiBold,
   },
   textPrimary: {
     color: '#fff',
+  },
+  textDisabled: {
+    color: Brand.text3,
   },
   textGhost: {
     color: Brand.brand,
   },
   pressed: {
-    opacity: 0.8,
+    opacity: 0.85,
   },
 });

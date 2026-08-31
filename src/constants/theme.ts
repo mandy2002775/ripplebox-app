@@ -26,24 +26,85 @@ export const Colors = {
 
 export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;
 
-/** Ripplebox brand palette, from the client-approved prototype. Not theme-dependent. */
+/** Ripplebox brand palette — deep aubergine anchor from the original
+ *  prototype, extended with the warm rose/gold pairing the marketing site
+ *  already established, plus soft-shadow-ready surfaces so cards read as
+ *  lifted rather than just outlined. */
 export const Brand = {
   brand: '#1C0A3A',
   brand2: '#2E1152',
   brand3: '#4A1F7C',
   accent: '#7B4FCC',
+  accentSoft: '#9D78E0',
   rose: '#3D1530',
+  roseVivid: '#FF6F91',
+  gold: '#FFC978',
   lavender: '#EDE8F9',
   text2: '#7A6E8A',
   text3: '#B0A8C0',
   border: '#EAE4F2',
-  bg: '#F8F5FC',
+  borderSoft: 'rgba(28,10,58,0.06)',
+  bg: '#FBF8FD',
+  surface: '#FFFFFF',
   green: '#1A5C38',
   greenBg: '#EAF5EE',
   amber: '#7A4F00',
   amberBg: '#FEF5E4',
   red: '#8B1F1F',
   redBg: '#FEF0F0',
+  /** Primary CTA / hero gradient — rose into aubergine, matches the
+   *  marketing site's --grad-primary. */
+  gradientPrimary: ['#FF6F91', '#7B4FCC', '#4A1F7C'] as const,
+  /** Deep, moody backdrop for full-bleed auth/splash surfaces. */
+  gradientDusk: ['#2E1152', '#1C0A3A', '#12061F'] as const,
+} as const;
+
+/** Real typography — Fraunces (an editorial display serif, used with
+ *  restraint) for headings and hero numerals, Inter for everything read
+ *  at length. Loaded via useFonts in the root layout; falls back to the
+ *  platform system font until then. */
+export const Type = {
+  display: 'Fraunces_600SemiBold',
+  displayItalic: 'Fraunces_500Medium_Italic',
+  displayBold: 'Fraunces_700Bold',
+  body: 'Inter_400Regular',
+  bodyMedium: 'Inter_500Medium',
+  bodySemiBold: 'Inter_600SemiBold',
+  bodyBold: 'Inter_700Bold',
+} as const;
+
+export const Radius = {
+  sm: 12,
+  md: 18,
+  lg: 24,
+  xl: 32,
+  pill: 999,
+} as const;
+
+/** Soft elevation presets — replaces flat 0.5px borders with real depth.
+ *  `elevation` covers Android; iOS/web read the shadow* props. */
+export const Shadow = {
+  sm: {
+    shadowColor: '#2A1150',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  md: {
+    shadowColor: '#2A1150',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.1,
+    shadowRadius: 20,
+    elevation: 6,
+  },
+  lg: {
+    shadowColor: '#1C0A3A',
+    shadowOffset: { width: 0, height: 16 },
+    shadowOpacity: 0.18,
+    shadowRadius: 36,
+    elevation: 12,
+  },
 } as const;
 
 export const Fonts = Platform.select({

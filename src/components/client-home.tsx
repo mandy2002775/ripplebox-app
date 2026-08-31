@@ -1,10 +1,12 @@
+import { Feather } from '@expo/vector-icons';
 import * as Clipboard from 'expo-clipboard';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { ActivityIndicator, Linking, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
 
 import { StatusBadge } from '@/components/status-badge';
-import { Brand } from '@/constants/theme';
+import { Brand, Radius, Shadow, Type } from '@/constants/theme';
 import { useAuth } from '@/contexts/auth-context';
 import { apiRequest } from '@/lib/api';
 import { ClientDashboard, NotificationsResponse, User } from '@/lib/types';
@@ -76,7 +78,7 @@ export function ClientHome({ user }: { user: User }) {
           <Text style={styles.name}>{user.name}</Text>
         </View>
         <Pressable onPress={() => router.push('/notifications')} style={styles.bellButton}>
-          <Text style={styles.bellIcon}>🔔</Text>
+          <Feather name="bell" size={17} color={Brand.brand} />
           {unreadCount > 0 && (
             <View style={styles.bellBadge}>
               <Text style={styles.bellBadgeText}>{unreadCount > 9 ? '9+' : unreadCount}</Text>
@@ -85,26 +87,34 @@ export function ClientHome({ user }: { user: User }) {
         </Pressable>
       </View>
 
-      <View style={styles.codeCard}>
+      <LinearGradient
+        colors={[Brand.roseVivid, Brand.accent, Brand.brand3]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.codeCard}>
         <Text style={styles.codeLabel}>Your referral code</Text>
         <View style={styles.codeRow}>
           <Text style={styles.code}>{user.client?.referral_code}</Text>
           <Pressable onPress={handleShare} style={styles.shareButton}>
+            <Feather name="share" size={13} color="#fff" />
             <Text style={styles.shareButtonText}>Share</Text>
           </Pressable>
         </View>
         <View style={styles.quickShareRow}>
           <Pressable onPress={handleShareWhatsApp} style={styles.quickShareChip}>
-            <Text style={styles.quickShareChipText}>💬 WhatsApp</Text>
+            <Feather name="message-circle" size={11} color="#fff" />
+            <Text style={styles.quickShareChipText}>WhatsApp</Text>
           </Pressable>
           <Pressable onPress={handleShareEmail} style={styles.quickShareChip}>
-            <Text style={styles.quickShareChipText}>✉️ Email</Text>
+            <Feather name="mail" size={11} color="#fff" />
+            <Text style={styles.quickShareChipText}>Email</Text>
           </Pressable>
           <Pressable onPress={handleCopyCode} style={styles.quickShareChip}>
-            <Text style={styles.quickShareChipText}>{isCopied ? '✓ Copied' : '📋 Copy'}</Text>
+            <Feather name={isCopied ? 'check' : 'copy'} size={11} color="#fff" />
+            <Text style={styles.quickShareChipText}>{isCopied ? 'Copied' : 'Copy'}</Text>
           </Pressable>
         </View>
-      </View>
+      </LinearGradient>
 
       {loadError ? (
         <View style={styles.errorBox}>
@@ -114,7 +124,7 @@ export function ClientHome({ user }: { user: User }) {
           </Pressable>
         </View>
       ) : isLoading || !dashboard ? (
-        <ActivityIndicator color={Brand.brand} style={{ marginTop: 20 }} />
+        <ActivityIndicator color={Brand.accent} style={{ marginTop: 20 }} />
       ) : (
         <>
           <View style={styles.statGrid}>
@@ -134,8 +144,9 @@ export function ClientHome({ user }: { user: User }) {
 
           <View style={styles.sectionHeaderRow}>
             <Text style={styles.sectionLabel}>Recent referrals</Text>
-            <Pressable onPress={() => router.push('/refer')}>
-              <Text style={styles.seeAll}>See all →</Text>
+            <Pressable onPress={() => router.push('/refer')} style={styles.seeAllRow}>
+              <Text style={styles.seeAll}>See all</Text>
+              <Feather name="arrow-right" size={12} color={Brand.accent} />
             </Pressable>
           </View>
           {dashboard.referrals.length === 0 ? (
@@ -152,12 +163,23 @@ export function ClientHome({ user }: { user: User }) {
             ))
           )}
 
-          <Pressable onPress={() => router.push('/discover')} style={styles.discoverCard}>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.discoverTitle}>Got a friend's code?</Text>
-              <Text style={styles.discoverSub}>Find their salon and redeem it in Discover</Text>
-            </View>
-            <Text style={styles.discoverArrow}>→</Text>
+          <Pressable onPress={() => router.push('/discover')}>
+            {({ pressed }) => (
+              <LinearGradient
+                colors={[Brand.brand2, Brand.brand]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={[styles.discoverCard, pressed && styles.pressed]}>
+                <View style={styles.discoverIconWrap}>
+                  <Feather name="search" size={17} color="#fff" />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.discoverTitle}>Got a friend's code?</Text>
+                  <Text style={styles.discoverSub}>Find their salon and redeem it in Discover</Text>
+                </View>
+                <Feather name="arrow-right" size={17} color="#fff" />
+              </LinearGradient>
+            )}
           </Pressable>
         </>
       )}
@@ -171,29 +193,25 @@ const styles = StyleSheet.create({
   eyebrow: {
     fontSize: 11,
     color: Brand.text3,
-    fontWeight: '500',
-    letterSpacing: 0.5,
+    fontFamily: Type.bodyMedium,
+    letterSpacing: 0.4,
     marginBottom: 4,
   },
-  name: { fontSize: 22, fontWeight: '500', color: Brand.brand },
+  name: { fontSize: 23, color: Brand.brand, fontFamily: Type.displayBold, letterSpacing: -0.3 },
   headerRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
     justifyContent: 'space-between',
-    marginBottom: 16,
+    marginBottom: 18,
   },
   bellButton: {
-    width: 34,
-    height: 34,
-    borderRadius: 10,
-    backgroundColor: '#fff',
-    borderWidth: 0.5,
-    borderColor: Brand.border,
+    width: 38,
+    height: 38,
+    borderRadius: Radius.sm,
+    backgroundColor: Brand.surface,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  bellIcon: {
-    fontSize: 15,
+    ...Shadow.sm,
   },
   bellBadge: {
     position: 'absolute',
@@ -209,111 +227,126 @@ const styles = StyleSheet.create({
   },
   bellBadgeText: {
     fontSize: 9,
-    fontWeight: '700',
+    fontFamily: Type.bodyBold,
     color: '#fff',
   },
   codeCard: {
-    backgroundColor: Brand.rose,
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 18,
+    borderRadius: Radius.lg,
+    padding: 20,
+    marginBottom: 20,
+    ...Shadow.md,
+    shadowColor: Brand.accent,
   },
-  codeLabel: { fontSize: 10, color: '#D0B8CC', marginBottom: 6 },
+  codeLabel: { fontSize: 11, color: 'rgba(255,255,255,0.7)', marginBottom: 8, fontFamily: Type.bodyMedium },
   codeRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  code: { fontSize: 24, fontWeight: '500', color: '#fff', letterSpacing: 4 },
+  code: { fontSize: 26, color: '#fff', letterSpacing: 4, fontFamily: Type.displayBold },
   shareButton: {
-    backgroundColor: 'rgba(255,255,255,0.14)',
-    borderRadius: 9,
-    paddingHorizontal: 12,
-    paddingVertical: 7,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: 'rgba(255,255,255,0.18)',
+    borderRadius: Radius.pill,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
   },
-  shareButtonText: { fontSize: 11, fontWeight: '500', color: '#fff' },
+  shareButtonText: { fontSize: 11.5, color: '#fff', fontFamily: Type.bodySemiBold },
   quickShareRow: {
     flexDirection: 'row',
-    gap: 5,
-    marginTop: 9,
+    gap: 7,
+    marginTop: 14,
   },
   quickShareChip: {
-    backgroundColor: 'rgba(255,255,255,0.06)',
-    borderRadius: 7,
-    paddingHorizontal: 9,
-    paddingVertical: 5,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    backgroundColor: 'rgba(255,255,255,0.12)',
+    borderRadius: Radius.pill,
+    paddingHorizontal: 11,
+    paddingVertical: 7,
   },
   quickShareChipText: {
-    fontSize: 10,
-    color: '#D0B8CC',
+    fontSize: 10.5,
+    color: 'rgba(255,255,255,0.9)',
+    fontFamily: Type.bodyMedium,
   },
-  statGrid: { flexDirection: 'row', gap: 8, marginBottom: 8 },
+  statGrid: { flexDirection: 'row', gap: 9, marginBottom: 10 },
   stat: {
     flex: 1,
-    backgroundColor: '#fff',
-    borderWidth: 0.5,
-    borderColor: Brand.border,
-    borderRadius: 14,
-    paddingVertical: 14,
+    backgroundColor: Brand.surface,
+    borderRadius: Radius.md,
+    paddingVertical: 15,
     alignItems: 'center',
+    ...Shadow.sm,
   },
-  statNumber: { fontSize: 19, fontWeight: '500', color: Brand.brand },
-  statLabel: { fontSize: 9, color: Brand.text3, marginTop: 2 },
+  statNumber: { fontSize: 20, color: Brand.brand, fontFamily: Type.displayBold },
+  statLabel: { fontSize: 9.5, color: Brand.text3, marginTop: 3, fontFamily: Type.bodyMedium },
   sectionHeaderRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginTop: 16,
-    marginBottom: 4,
+    marginTop: 18,
+    marginBottom: 6,
   },
   sectionLabel: {
-    fontSize: 10,
-    fontWeight: '500',
+    fontSize: 10.5,
     color: Brand.text3,
     letterSpacing: 0.5,
     textTransform: 'uppercase',
+    fontFamily: Type.bodySemiBold,
   },
+  seeAllRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   seeAll: {
-    fontSize: 11,
-    fontWeight: '500',
+    fontSize: 11.5,
     color: Brand.accent,
+    fontFamily: Type.bodySemiBold,
   },
-  emptyText: { fontSize: 12, color: Brand.text3, marginTop: 4 },
+  emptyText: { fontSize: 12, color: Brand.text3, marginTop: 4, fontFamily: Type.body },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
-    backgroundColor: '#fff',
-    borderWidth: 0.5,
-    borderColor: Brand.border,
-    borderRadius: 14,
-    padding: 12,
-    marginBottom: 7,
+    backgroundColor: Brand.surface,
+    borderRadius: Radius.md,
+    padding: 13,
+    marginBottom: 8,
+    ...Shadow.sm,
   },
-  rowTitle: { fontSize: 12.5, fontWeight: '500', color: Brand.brand },
-  rowSub: { fontSize: 11, color: Brand.text2, marginTop: 1 },
+  rowTitle: { fontSize: 13, color: Brand.brand, fontFamily: Type.bodySemiBold },
+  rowSub: { fontSize: 11, color: Brand.text2, marginTop: 1, fontFamily: Type.body },
   discoverCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Brand.brand,
-    borderRadius: 16,
-    padding: 16,
-    marginTop: 18,
+    gap: 12,
+    borderRadius: Radius.lg,
+    padding: 17,
+    marginTop: 20,
+    ...Shadow.md,
   },
-  discoverTitle: { fontSize: 13.5, fontWeight: '500', color: '#fff', marginBottom: 2 },
-  discoverSub: { fontSize: 11, color: 'rgba(255,255,255,0.7)' },
-  discoverArrow: { fontSize: 18, color: '#fff', marginLeft: 10 },
+  discoverIconWrap: {
+    width: 38,
+    height: 38,
+    borderRadius: Radius.sm,
+    backgroundColor: 'rgba(255,255,255,0.14)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  discoverTitle: { fontSize: 14, color: '#fff', marginBottom: 2, fontFamily: Type.bodySemiBold },
+  discoverSub: { fontSize: 11, color: 'rgba(255,255,255,0.68)', fontFamily: Type.body },
+  pressed: { opacity: 0.9 },
   errorBox: {
-    backgroundColor: '#fff',
-    borderWidth: 0.5,
-    borderColor: Brand.border,
-    borderRadius: 14,
-    padding: 20,
+    backgroundColor: Brand.surface,
+    borderRadius: Radius.md,
+    padding: 22,
     alignItems: 'center',
     marginTop: 20,
+    ...Shadow.sm,
   },
-  errorBoxText: { fontSize: 12.5, color: Brand.text2, marginBottom: 12 },
+  errorBoxText: { fontSize: 12.5, color: Brand.text2, marginBottom: 12, fontFamily: Type.body },
   retryButton: {
     backgroundColor: Brand.brand,
-    borderRadius: 10,
+    borderRadius: Radius.pill,
     paddingHorizontal: 18,
     paddingVertical: 9,
   },
-  retryButtonText: { fontSize: 12.5, fontWeight: '500', color: '#fff' },
+  retryButtonText: { fontSize: 12.5, color: '#fff', fontFamily: Type.bodySemiBold },
 });

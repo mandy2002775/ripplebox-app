@@ -1,13 +1,12 @@
+import { Feather } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
-import { ColorValue, Text } from 'react-native';
+import { ColorValue } from 'react-native';
 
-import { Brand } from '@/constants/theme';
+import { Brand, Type } from '@/constants/theme';
 import { useAuth } from '@/contexts/auth-context';
 
-function TabIcon({ label, color }: { label: string; color: ColorValue }) {
-  return (
-    <Text style={{ fontSize: 19, color, opacity: color === Brand.text3 ? 0.5 : 1 }}>{label}</Text>
-  );
+function TabIcon({ name, color }: { name: keyof typeof Feather.glyphMap; color: ColorValue }) {
+  return <Feather name={name} size={20} color={color} />;
 }
 
 export default function TabsLayout() {
@@ -19,23 +18,27 @@ export default function TabsLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: Brand.brand,
+        tabBarActiveTintColor: Brand.accent,
         tabBarInactiveTintColor: Brand.text3,
         tabBarStyle: {
-          backgroundColor: '#fff',
-          borderTopWidth: 0.5,
-          borderTopColor: Brand.border,
-          paddingTop: 7,
-          paddingBottom: 9,
-          height: 58,
+          backgroundColor: Brand.surface,
+          borderTopWidth: 0,
+          shadowColor: '#2A1150',
+          shadowOffset: { width: 0, height: -4 },
+          shadowOpacity: 0.06,
+          shadowRadius: 12,
+          elevation: 8,
+          paddingTop: 8,
+          paddingBottom: 10,
+          height: 60,
         },
-        tabBarLabelStyle: { fontSize: 9, fontWeight: '500' },
+        tabBarLabelStyle: { fontSize: 9.5, fontFamily: Type.bodySemiBold },
       }}>
       <Tabs.Screen
         name="index"
         options={{
           title: isSalon ? 'Dashboard' : 'Home',
-          tabBarIcon: ({ color }) => <TabIcon label={isSalon ? '📊' : '🏠'} color={color} />,
+          tabBarIcon: ({ color }) => <TabIcon name={isSalon ? 'bar-chart-2' : 'home'} color={color} />,
         }}
       />
 
@@ -44,21 +47,21 @@ export default function TabsLayout() {
           name="clients"
           options={{
             title: 'Clients',
-            tabBarIcon: ({ color }) => <TabIcon label="👥" color={color} />,
+            tabBarIcon: ({ color }) => <TabIcon name="users" color={color} />,
           }}
         />
         <Tabs.Screen
           name="rewards"
           options={{
             title: 'Rewards',
-            tabBarIcon: ({ color }) => <TabIcon label="🎁" color={color} />,
+            tabBarIcon: ({ color }) => <TabIcon name="gift" color={color} />,
           }}
         />
         <Tabs.Screen
           name="content"
           options={{
             title: 'Content',
-            tabBarIcon: ({ color }) => <TabIcon label="🖼️" color={color} />,
+            tabBarIcon: ({ color }) => <TabIcon name="image" color={color} />,
           }}
         />
       </Tabs.Protected>
@@ -68,21 +71,21 @@ export default function TabsLayout() {
           name="discover"
           options={{
             title: 'Discover',
-            tabBarIcon: ({ color }) => <TabIcon label="🔍" color={color} />,
+            tabBarIcon: ({ color }) => <TabIcon name="search" color={color} />,
           }}
         />
         <Tabs.Screen
           name="refer"
           options={{
             title: 'Refer',
-            tabBarIcon: ({ color }) => <TabIcon label="📤" color={color} />,
+            tabBarIcon: ({ color }) => <TabIcon name="send" color={color} />,
           }}
         />
         <Tabs.Screen
           name="client-rewards"
           options={{
             title: 'Rewards',
-            tabBarIcon: ({ color }) => <TabIcon label="🎁" color={color} />,
+            tabBarIcon: ({ color }) => <TabIcon name="gift" color={color} />,
           }}
         />
       </Tabs.Protected>
@@ -91,7 +94,7 @@ export default function TabsLayout() {
         name="profile"
         options={{
           title: 'Profile',
-          tabBarIcon: ({ color }) => <TabIcon label="👤" color={color} />,
+          tabBarIcon: ({ color }) => <TabIcon name="user" color={color} />,
         }}
       />
     </Tabs>

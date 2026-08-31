@@ -1,9 +1,10 @@
+import { Feather } from '@expo/vector-icons';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { ActivityIndicator, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { StatusBadge } from '@/components/status-badge';
-import { Brand } from '@/constants/theme';
+import { Brand, Radius, Shadow, Type } from '@/constants/theme';
 import { useAuth } from '@/contexts/auth-context';
 import { apiRequest, ApiError } from '@/lib/api';
 import { NotificationsResponse, SalonDashboard, User } from '@/lib/types';
@@ -76,8 +77,12 @@ export function SalonHome({ user }: { user: User }) {
     <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
       <View style={styles.headerRow}>
         <View style={styles.headerIdentity}>
-          {user.salon?.logo_url && (
+          {user.salon?.logo_url ? (
             <Image source={{ uri: user.salon.logo_url }} style={styles.logo} />
+          ) : (
+            <View style={styles.logoPlaceholder}>
+              <Feather name="scissors" size={16} color={Brand.accent} />
+            </View>
           )}
           <View>
             <Text style={styles.eyebrow}>Business dashboard</Text>
@@ -85,16 +90,16 @@ export function SalonHome({ user }: { user: User }) {
           </View>
         </View>
         <View style={styles.headerActions}>
-          <Pressable onPress={() => router.push('/notifications')} style={styles.bellButton}>
-            <Text style={styles.bellIcon}>🔔</Text>
+          <Pressable onPress={() => router.push('/notifications')} style={styles.iconButton}>
+            <Feather name="bell" size={16} color={Brand.brand} />
             {unreadCount > 0 && (
               <View style={styles.bellBadge}>
                 <Text style={styles.bellBadgeText}>{unreadCount > 9 ? '9+' : unreadCount}</Text>
               </View>
             )}
           </Pressable>
-          <Pressable onPress={() => router.push('/profile')} style={styles.bellButton}>
-            <Text style={styles.bellIcon}>⚙️</Text>
+          <Pressable onPress={() => router.push('/profile')} style={styles.iconButton}>
+            <Feather name="settings" size={16} color={Brand.brand} />
           </Pressable>
         </View>
       </View>
@@ -107,7 +112,7 @@ export function SalonHome({ user }: { user: User }) {
           </Pressable>
         </View>
       ) : isLoading || !dashboard ? (
-        <ActivityIndicator color={Brand.brand} style={{ marginTop: 20 }} />
+        <ActivityIndicator color={Brand.accent} style={{ marginTop: 20 }} />
       ) : (
         <>
           <View style={styles.statGrid}>
@@ -188,6 +193,9 @@ export function SalonHome({ user }: { user: User }) {
           ) : (
             dashboard.active_rewards.map((reward) => (
               <View key={reward.id} style={styles.row}>
+                <View style={styles.rewardIconWrap}>
+                  <Feather name="gift" size={15} color={Brand.accent} />
+                </View>
                 <View style={{ flex: 1 }}>
                   <Text style={styles.rowTitle}>{reward.description}</Text>
                   <Text style={styles.rowSub}>{reward.redemptions_count ?? 0} redeemed</Text>
@@ -216,48 +224,53 @@ const styles = StyleSheet.create({
   eyebrow: {
     fontSize: 11,
     color: Brand.text3,
-    fontWeight: '500',
-    letterSpacing: 0.5,
+    fontFamily: Type.bodyMedium,
+    letterSpacing: 0.4,
     marginBottom: 4,
   },
   name: {
-    fontSize: 22,
-    fontWeight: '500',
+    fontSize: 21,
     color: Brand.brand,
+    fontFamily: Type.displayBold,
+    letterSpacing: -0.2,
   },
   headerRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
     justifyContent: 'space-between',
-    marginBottom: 18,
+    marginBottom: 20,
   },
   headerIdentity: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
+    gap: 11,
   },
   headerActions: {
     flexDirection: 'row',
     gap: 8,
   },
   logo: {
-    width: 38,
-    height: 38,
-    borderRadius: 12,
+    width: 40,
+    height: 40,
+    borderRadius: Radius.sm,
     backgroundColor: Brand.lavender,
   },
-  bellButton: {
-    width: 34,
-    height: 34,
-    borderRadius: 10,
-    backgroundColor: '#fff',
-    borderWidth: 0.5,
-    borderColor: Brand.border,
+  logoPlaceholder: {
+    width: 40,
+    height: 40,
+    borderRadius: Radius.sm,
+    backgroundColor: Brand.lavender,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  bellIcon: {
-    fontSize: 15,
+  iconButton: {
+    width: 38,
+    height: 38,
+    borderRadius: Radius.sm,
+    backgroundColor: Brand.surface,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...Shadow.sm,
   },
   bellBadge: {
     position: 'absolute',
@@ -273,66 +286,75 @@ const styles = StyleSheet.create({
   },
   bellBadgeText: {
     fontSize: 9,
-    fontWeight: '700',
+    fontFamily: Type.bodyBold,
     color: '#fff',
   },
   statGrid: {
     flexDirection: 'row',
-    gap: 8,
-    marginBottom: 18,
+    gap: 9,
+    marginBottom: 20,
   },
   stat: {
     flex: 1,
-    backgroundColor: '#fff',
-    borderWidth: 0.5,
-    borderColor: Brand.border,
-    borderRadius: 14,
-    paddingVertical: 14,
+    backgroundColor: Brand.surface,
+    borderRadius: Radius.md,
+    paddingVertical: 16,
     alignItems: 'center',
+    ...Shadow.sm,
   },
   statNumber: {
-    fontSize: 22,
-    fontWeight: '500',
+    fontSize: 23,
     color: Brand.brand,
+    fontFamily: Type.displayBold,
   },
   statLabel: {
     fontSize: 10,
     color: Brand.text3,
-    marginTop: 2,
+    marginTop: 3,
+    fontFamily: Type.bodyMedium,
   },
   sectionLabel: {
-    fontSize: 10,
-    fontWeight: '500',
+    fontSize: 10.5,
     color: Brand.text3,
     letterSpacing: 0.5,
     textTransform: 'uppercase',
-    marginTop: 14,
+    marginTop: 16,
     marginBottom: 8,
+    fontFamily: Type.bodySemiBold,
   },
   emptyText: {
     fontSize: 12,
     color: Brand.text3,
+    fontFamily: Type.body,
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
-    backgroundColor: '#fff',
-    borderWidth: 0.5,
-    borderColor: Brand.border,
-    borderRadius: 14,
-    padding: 12,
-    marginBottom: 7,
+    gap: 11,
+    backgroundColor: Brand.surface,
+    borderRadius: Radius.md,
+    padding: 13,
+    marginBottom: 8,
+    ...Shadow.sm,
+  },
+  rewardIconWrap: {
+    width: 34,
+    height: 34,
+    borderRadius: Radius.sm,
+    backgroundColor: Brand.lavender,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   rowTitle: {
-    fontSize: 12.5,
-    fontWeight: '500',
+    fontSize: 13,
     color: Brand.brand,
+    fontFamily: Type.bodySemiBold,
   },
   rowSub: {
     fontSize: 11,
     color: Brand.text2,
     marginTop: 1,
+    fontFamily: Type.body,
   },
   actionRow: {
     flexDirection: 'row',
@@ -342,76 +364,75 @@ const styles = StyleSheet.create({
   engageLink: {
     borderWidth: 1,
     borderColor: Brand.border,
-    borderRadius: 20,
+    borderRadius: Radius.pill,
     paddingHorizontal: 10,
-    paddingVertical: 4,
+    paddingVertical: 5,
   },
   engageLinkText: {
     fontSize: 11,
-    fontWeight: '500',
     color: Brand.text2,
+    fontFamily: Type.bodyMedium,
   },
   completeLink: {
     backgroundColor: Brand.lavender,
-    borderRadius: 20,
+    borderRadius: Radius.pill,
     paddingHorizontal: 10,
-    paddingVertical: 4,
+    paddingVertical: 5,
   },
   completeLinkText: {
     fontSize: 11,
-    fontWeight: '500',
     color: Brand.brand3,
+    fontFamily: Type.bodyMedium,
   },
   rewardPicker: {
-    backgroundColor: '#fff',
-    borderWidth: 0.5,
-    borderColor: Brand.border,
-    borderRadius: 14,
-    padding: 12,
+    backgroundColor: Brand.surface,
+    borderRadius: Radius.md,
+    padding: 13,
     marginTop: -3,
-    marginBottom: 7,
+    marginBottom: 8,
+    ...Shadow.sm,
   },
   rewardPickerLabel: {
     fontSize: 10.5,
-    fontWeight: '500',
     color: Brand.text3,
     marginBottom: 8,
+    fontFamily: Type.bodyMedium,
   },
   rewardOption: {
     backgroundColor: Brand.lavender,
-    borderRadius: 11,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
+    borderRadius: Radius.sm,
+    paddingHorizontal: 13,
+    paddingVertical: 11,
     marginBottom: 6,
   },
   rewardOptionText: {
-    fontSize: 12.5,
-    fontWeight: '500',
+    fontSize: 13,
     color: Brand.brand,
+    fontFamily: Type.bodySemiBold,
   },
   pressed: {
-    opacity: 0.75,
+    opacity: 0.8,
   },
   error: {
     fontSize: 11.5,
     color: Brand.red,
     marginTop: 2,
+    fontFamily: Type.body,
   },
   errorBox: {
-    backgroundColor: '#fff',
-    borderWidth: 0.5,
-    borderColor: Brand.border,
-    borderRadius: 14,
-    padding: 20,
+    backgroundColor: Brand.surface,
+    borderRadius: Radius.md,
+    padding: 22,
     alignItems: 'center',
     marginTop: 20,
+    ...Shadow.sm,
   },
-  errorBoxText: { fontSize: 12.5, color: Brand.text2, marginBottom: 12 },
+  errorBoxText: { fontSize: 12.5, color: Brand.text2, marginBottom: 12, fontFamily: Type.body },
   retryButton: {
     backgroundColor: Brand.brand,
-    borderRadius: 10,
+    borderRadius: Radius.pill,
     paddingHorizontal: 18,
     paddingVertical: 9,
   },
-  retryButtonText: { fontSize: 12.5, fontWeight: '500', color: '#fff' },
+  retryButtonText: { fontSize: 12.5, color: '#fff', fontFamily: Type.bodySemiBold },
 });
