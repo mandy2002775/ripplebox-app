@@ -243,6 +243,12 @@ export default function DiscoverScreen() {
                         <Text style={styles.rewardChipText}>{s.top_reward}</Text>
                       </View>
                     )}
+                    {!s.is_claimed && (
+                      <View style={styles.unclaimedChip}>
+                        <Feather name="clock" size={9} color={Brand.text3} />
+                        <Text style={styles.unclaimedChipText}>Not yet on Ripplebox</Text>
+                      </View>
+                    )}
                   </View>
                   <Pressable onPress={() => toggleFavorite(s)} hitSlop={8} style={styles.favoriteButton}>
                     <Feather
@@ -258,7 +264,16 @@ export default function DiscoverScreen() {
                   />
                 </Pressable>
 
-                {selectedSalonId === s.id && (
+                {selectedSalonId === s.id && !s.is_claimed && (
+                  <View style={styles.redeemBox}>
+                    <Text style={styles.unclaimedNotice}>
+                      {s.business_name} hasn't joined Ripplebox yet — check back soon, or let them know you'd
+                      love to see them here!
+                    </Text>
+                  </View>
+                )}
+
+                {selectedSalonId === s.id && s.is_claimed && (
                   <View style={styles.redeemBox}>
                     {isLoadingContent ? (
                       <ActivityIndicator color={Brand.accent} style={{ marginBottom: 10 }} />
@@ -406,6 +421,19 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
   rewardChipText: { fontSize: 10, color: Brand.amber, fontFamily: Type.bodyMedium },
+  unclaimedChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    alignSelf: 'flex-start',
+    backgroundColor: Brand.lavender,
+    borderRadius: Radius.pill,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    marginTop: 5,
+  },
+  unclaimedChipText: { fontSize: 10, color: Brand.text3, fontFamily: Type.bodyMedium },
+  unclaimedNotice: { fontSize: 12, color: Brand.text2, fontFamily: Type.body, lineHeight: 17 },
   redeemBox: {
     backgroundColor: Brand.surface,
     borderRadius: Radius.md,

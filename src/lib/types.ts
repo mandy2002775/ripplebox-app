@@ -92,6 +92,7 @@ export type SalonSummary = {
   logo_url: string | null;
   top_reward: string | null;
   is_favorited: boolean;
+  is_claimed: boolean;
 };
 
 export type ContentPost = {

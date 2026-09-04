@@ -44,16 +44,19 @@ const TABLES: Table[] = [
   },
   {
     name: 'salons',
-    note: 'FK: users.id',
+    note: 'FK: users.id (nullable)',
     accent: Brand.brand2,
     fields: [
       { name: 'id', type: 'UUID PK', kind: 'pk' },
-      { name: 'user_id', type: 'FK → users', kind: 'fk' },
+      { name: 'user_id', type: 'FK → users, nullable', kind: 'fk' },
       { name: 'business_name', type: 'VARCHAR' },
+      { name: 'category', type: 'ENUM nullable' },
       { name: 'location', type: 'VARCHAR' },
       { name: 'website', type: 'VARCHAR nullable' },
       { name: 'instagram_handle', type: 'VARCHAR nullable' },
       { name: 'google_place_id', type: 'VARCHAR nullable' },
+      { name: 'external_ref', type: 'VARCHAR unique, nullable' },
+      { name: 'source', type: "VARCHAR ('signup' or 'osm_import')" },
       { name: 'logo_url', type: 'VARCHAR nullable' },
       { name: 'subscription_status', type: 'ENUM' },
       { name: 'deleted_at', type: 'soft delete' },
@@ -151,6 +154,41 @@ const TABLES: Table[] = [
       { name: 'source', type: 'VARCHAR' },
     ],
   },
+  {
+    name: 'content_posts',
+    note: 'FK: salons.id',
+    accent: Brand.accent,
+    fields: [
+      { name: 'id', type: 'UUID PK', kind: 'pk' },
+      { name: 'salon_id', type: 'FK → salons', kind: 'fk' },
+      { name: 'image_path', type: 'VARCHAR' },
+      { name: 'image_mime', type: 'VARCHAR' },
+      { name: 'caption', type: 'VARCHAR nullable' },
+      { name: 'deleted_at', type: 'soft delete' },
+    ],
+  },
+  {
+    name: 'content_likes',
+    note: 'FK: content_posts + clients',
+    accent: Brand.accent,
+    fields: [
+      { name: 'id', type: 'UUID PK', kind: 'pk' },
+      { name: 'content_post_id', type: 'FK → content_posts', kind: 'fk' },
+      { name: 'client_id', type: 'FK → clients', kind: 'fk' },
+      { name: 'created_at', type: 'TIMESTAMP' },
+    ],
+  },
+  {
+    name: 'salon_favorites',
+    note: 'FK: clients + salons',
+    accent: Brand.accent,
+    fields: [
+      { name: 'id', type: 'UUID PK', kind: 'pk' },
+      { name: 'client_id', type: 'FK → clients', kind: 'fk' },
+      { name: 'salon_id', type: 'FK → salons', kind: 'fk' },
+      { name: 'created_at', type: 'TIMESTAMP' },
+    ],
+  },
 ];
 
 export default function DbSchemaScreen() {
@@ -170,14 +208,15 @@ export default function DbSchemaScreen() {
           </Pressable>
           <View>
             <Text style={styles.heading}>Database schema</Text>
-            <Text style={styles.subheading}>SQLite (dev) / MySQL 8.0 (prod) · 10 tables</Text>
+            <Text style={styles.subheading}>SQLite (dev) / MySQL 8.0 (prod) · 13 tables</Text>
           </View>
         </View>
 
         <ScrollView contentContainerStyle={styles.body}>
           <Text style={styles.intro}>
-            Entity overview. All tables use soft delete (deleted_at) except otp_codes, which
-            never carries user-identifying data on its own and expires quickly.
+            Entity overview. Most tables use soft delete (deleted_at) — otp_codes, content_likes,
+            and salon_favorites don't, since a "like" or "favorite" toggling back off should
+            actually remove the row, not just hide it.
           </Text>
 
           {TABLES.map((table) => (
