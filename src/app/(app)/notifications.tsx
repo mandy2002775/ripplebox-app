@@ -1,9 +1,10 @@
+import { Feather } from '@expo/vector-icons';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Brand } from '@/constants/theme';
+import { Brand, Radius, Shadow, Type } from '@/constants/theme';
 import { useAuth } from '@/contexts/auth-context';
 import { apiRequest } from '@/lib/api';
 import {
@@ -97,7 +98,7 @@ export default function NotificationsScreen() {
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.header}>
           <Pressable onPress={() => router.back()} style={styles.backButton}>
-            <Text style={styles.backButtonText}>{'‹'}</Text>
+            <Feather name="chevron-left" size={18} color={Brand.brand} />
           </Pressable>
           <Text style={styles.heading}>Notifications</Text>
           {hasUnread && (
@@ -120,7 +121,7 @@ export default function NotificationsScreen() {
             </Pressable>
           </View>
         ) : isLoading || !data ? (
-          <ActivityIndicator color={Brand.brand} style={{ marginTop: 20 }} />
+          <ActivityIndicator color={Brand.accent} style={{ marginTop: 20 }} />
         ) : data.notifications.length === 0 ? (
           <Text style={styles.emptyText}>Nothing yet — you'll see referral and reward updates here.</Text>
         ) : (
@@ -165,74 +166,69 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   backButton: {
-    width: 30,
-    height: 30,
-    borderRadius: 8,
-    backgroundColor: '#fff',
-    borderWidth: 0.5,
-    borderColor: Brand.border,
+    width: 34,
+    height: 34,
+    borderRadius: Radius.sm,
+    backgroundColor: Brand.surface,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  backButtonText: {
-    fontSize: 18,
-    color: Brand.brand,
-    marginTop: -2,
+    ...Shadow.sm,
   },
   heading: {
     flex: 1,
     fontSize: 21,
-    fontWeight: '500',
     color: Brand.brand,
+    fontFamily: Type.displayBold,
+    letterSpacing: -0.2,
   },
   markAllButton: {
     backgroundColor: Brand.lavender,
-    borderRadius: 20,
-    paddingHorizontal: 10,
+    borderRadius: Radius.pill,
+    paddingHorizontal: 11,
     paddingVertical: 6,
   },
   markAllButtonText: {
     fontSize: 11,
-    fontWeight: '500',
     color: Brand.brand3,
+    fontFamily: Type.bodyMedium,
   },
   markAllButtonDisabled: { opacity: 0.6 },
   errorBox: {
-    backgroundColor: '#fff',
-    borderWidth: 0.5,
-    borderColor: Brand.border,
-    borderRadius: 14,
-    padding: 20,
+    backgroundColor: Brand.surface,
+    borderRadius: Radius.md,
+    padding: 22,
     alignItems: 'center',
     marginTop: 20,
+    ...Shadow.sm,
   },
-  errorBoxText: { fontSize: 12.5, color: Brand.text2, marginBottom: 12 },
+  errorBoxText: { fontSize: 12.5, color: Brand.text2, marginBottom: 12, fontFamily: Type.body },
   retryButton: {
     backgroundColor: Brand.brand,
-    borderRadius: 10,
+    borderRadius: Radius.pill,
     paddingHorizontal: 18,
     paddingVertical: 9,
   },
-  retryButtonText: { fontSize: 12.5, fontWeight: '500', color: '#fff' },
+  retryButtonText: { fontSize: 12.5, color: '#fff', fontFamily: Type.bodySemiBold },
   emptyText: {
     fontSize: 13,
     color: Brand.text3,
     marginTop: 12,
+    fontFamily: Type.body,
   },
   row: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    gap: 8,
-    backgroundColor: '#fff',
-    borderWidth: 0.5,
-    borderColor: Brand.border,
-    borderRadius: 14,
-    padding: 14,
+    gap: 9,
+    backgroundColor: Brand.surface,
+    borderRadius: Radius.md,
+    padding: 15,
     marginBottom: 8,
+    ...Shadow.sm,
   },
   rowUnread: {
-    borderColor: Brand.accent,
     backgroundColor: Brand.lavender,
+    shadowOpacity: 0,
+    elevation: 0,
   },
   dot: {
     width: 7,
@@ -242,13 +238,14 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
   rowTitle: {
-    fontSize: 13,
-    fontWeight: '500',
+    fontSize: 13.5,
     color: Brand.brand,
+    fontFamily: Type.bodySemiBold,
   },
   rowSub: {
     fontSize: 11.5,
     color: Brand.text2,
     marginTop: 2,
+    fontFamily: Type.body,
   },
 });

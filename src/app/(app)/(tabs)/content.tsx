@@ -1,3 +1,5 @@
+import { Feather } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import * as ImagePicker from 'expo-image-picker';
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
@@ -14,7 +16,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Brand } from '@/constants/theme';
+import { Brand, Radius, Shadow, Type } from '@/constants/theme';
 import { useAuth } from '@/contexts/auth-context';
 import { apiRequest, apiUploadRequest, ApiError } from '@/lib/api';
 import { ContentPost } from '@/lib/types';
@@ -129,17 +131,22 @@ export default function ContentScreen() {
                     style={styles.cancelButton}>
                     <Text style={styles.cancelButtonText}>Cancel</Text>
                   </Pressable>
-                  <Pressable
-                    disabled={isUploading}
-                    onPress={handleUpload}
-                    style={[styles.postButton, isUploading && styles.buttonDisabled]}>
-                    <Text style={styles.postButtonText}>{isUploading ? 'Posting…' : 'Post'}</Text>
+                  <Pressable disabled={isUploading} onPress={handleUpload} style={styles.postButtonWrap}>
+                    <LinearGradient
+                      colors={[Brand.roseVivid, Brand.accent]}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 0 }}
+                      style={[styles.postButton, isUploading && styles.buttonDisabled]}>
+                      <Text style={styles.postButtonText}>{isUploading ? 'Posting…' : 'Post'}</Text>
+                    </LinearGradient>
                   </Pressable>
                 </View>
               </>
             ) : (
               <Pressable onPress={handlePick} style={styles.pickButton}>
-                <Text style={styles.pickButtonIcon}>📷</Text>
+                <View style={styles.pickIconWrap}>
+                  <Feather name="camera" size={20} color={Brand.accent} />
+                </View>
                 <Text style={styles.pickButtonText}>Choose a photo to post</Text>
               </Pressable>
             )}
@@ -153,7 +160,7 @@ export default function ContentScreen() {
               </Pressable>
             </View>
           ) : isLoading ? (
-            <ActivityIndicator color={Brand.brand} style={{ marginTop: 20 }} />
+            <ActivityIndicator color={Brand.accent} style={{ marginTop: 20 }} />
           ) : posts.length === 0 ? (
             <Text style={styles.emptyText}>No posts yet — share your first photo above.</Text>
           ) : (
@@ -165,7 +172,10 @@ export default function ContentScreen() {
                     style={styles.gridImage}
                   />
                   <View style={styles.gridOverlay}>
-                    <Text style={styles.likesText}>❤️ {post.likes_count}</Text>
+                    <View style={styles.likesRow}>
+                      <Feather name="heart" size={11} color={Brand.roseVivid} />
+                      <Text style={styles.likesText}>{post.likes_count}</Text>
+                    </View>
                     <Pressable
                       disabled={deletingId === post.id}
                       onPress={() =>
@@ -175,9 +185,7 @@ export default function ContentScreen() {
                         ])
                       }
                       style={styles.deleteButton}>
-                      <Text style={styles.deleteButtonText}>
-                        {deletingId === post.id ? '…' : '🗑'}
-                      </Text>
+                      <Feather name="trash-2" size={13} color={Brand.text3} />
                     </Pressable>
                   </View>
                   {post.caption && (
@@ -198,65 +206,74 @@ export default function ContentScreen() {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: Brand.bg },
   safeArea: { flex: 1 },
-  header: { paddingHorizontal: 20, paddingTop: 12, marginBottom: 12 },
-  heading: { fontSize: 16, fontWeight: '500', color: Brand.brand },
-  subheading: { fontSize: 11, color: Brand.text2 },
+  header: { paddingHorizontal: 20, paddingTop: 14, marginBottom: 14 },
+  heading: { fontSize: 19, color: Brand.brand, fontFamily: Type.displayBold, letterSpacing: -0.2 },
+  subheading: { fontSize: 11.5, color: Brand.text2, marginTop: 2, fontFamily: Type.body },
   body: { paddingHorizontal: 20, paddingBottom: 40 },
   uploadCard: {
-    backgroundColor: '#fff',
-    borderWidth: 0.5,
-    borderColor: Brand.border,
-    borderRadius: 16,
-    padding: 14,
+    backgroundColor: Brand.surface,
+    borderRadius: Radius.lg,
+    padding: 15,
     marginBottom: 18,
+    ...Shadow.sm,
   },
   pickButton: {
     borderWidth: 1.5,
     borderColor: Brand.border,
     borderStyle: 'dashed',
-    borderRadius: 12,
-    paddingVertical: 28,
+    borderRadius: Radius.md,
+    paddingVertical: 30,
     alignItems: 'center',
   },
-  pickButtonIcon: { fontSize: 26, marginBottom: 6 },
-  pickButtonText: { fontSize: 12.5, color: Brand.text2, fontWeight: '500' },
-  preview: { width: '100%', aspectRatio: 4 / 3, borderRadius: 12, backgroundColor: Brand.lavender },
+  pickIconWrap: {
+    width: 44,
+    height: 44,
+    borderRadius: Radius.sm,
+    backgroundColor: Brand.lavender,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 10,
+  },
+  pickButtonText: { fontSize: 12.5, color: Brand.text2, fontFamily: Type.bodyMedium },
+  preview: { width: '100%', aspectRatio: 4 / 3, borderRadius: Radius.sm, backgroundColor: Brand.lavender },
   input: {
     backgroundColor: Brand.lavender,
-    borderRadius: 11,
+    borderRadius: Radius.sm,
     paddingHorizontal: 14,
     paddingVertical: 12,
     fontSize: 13.5,
     color: Brand.brand,
     marginTop: 10,
+    fontFamily: Type.bodyMedium,
   },
-  error: { fontSize: 12, color: Brand.red, marginTop: 8 },
+  error: { fontSize: 12, color: Brand.red, marginTop: 8, fontFamily: Type.body },
   uploadActions: { flexDirection: 'row', gap: 8, marginTop: 10 },
   cancelButton: {
     flex: 1,
     borderWidth: 1.5,
     borderColor: Brand.border,
-    borderRadius: 12,
+    borderRadius: Radius.pill,
     paddingVertical: 11,
     alignItems: 'center',
   },
-  cancelButtonText: { fontSize: 12.5, fontWeight: '500', color: Brand.text2 },
+  cancelButtonText: { fontSize: 12.5, color: Brand.text2, fontFamily: Type.bodyMedium },
+  postButtonWrap: { flex: 1 },
   postButton: {
-    flex: 1,
-    backgroundColor: Brand.brand,
-    borderRadius: 12,
+    borderRadius: Radius.pill,
     paddingVertical: 11,
     alignItems: 'center',
+    ...Shadow.sm,
+    shadowColor: Brand.accent,
   },
   buttonDisabled: { opacity: 0.6 },
-  postButtonText: { fontSize: 12.5, fontWeight: '500', color: '#fff' },
-  emptyText: { fontSize: 12, color: Brand.text3, textAlign: 'center', marginTop: 30 },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
+  postButtonText: { fontSize: 12.5, color: '#fff', fontFamily: Type.bodySemiBold },
+  emptyText: { fontSize: 12, color: Brand.text3, textAlign: 'center', marginTop: 30, fontFamily: Type.body },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
   gridItem: { width: '47%' },
   gridImage: {
     width: '100%',
     aspectRatio: 1,
-    borderRadius: 12,
+    borderRadius: Radius.sm,
     backgroundColor: Brand.lavender,
   },
   gridOverlay: {
@@ -265,25 +282,24 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 6,
   },
-  likesText: { fontSize: 11.5, color: Brand.text2 },
+  likesRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  likesText: { fontSize: 11.5, color: Brand.text2, fontFamily: Type.bodyMedium },
   deleteButton: { padding: 4 },
-  deleteButtonText: { fontSize: 13 },
-  caption: { fontSize: 11, color: Brand.text2, marginTop: 2 },
+  caption: { fontSize: 11, color: Brand.text2, marginTop: 2, fontFamily: Type.body },
   errorBox: {
-    backgroundColor: '#fff',
-    borderWidth: 0.5,
-    borderColor: Brand.border,
-    borderRadius: 14,
-    padding: 20,
+    backgroundColor: Brand.surface,
+    borderRadius: Radius.md,
+    padding: 22,
     alignItems: 'center',
     marginTop: 10,
+    ...Shadow.sm,
   },
-  errorBoxText: { fontSize: 12.5, color: Brand.text2, marginBottom: 12 },
+  errorBoxText: { fontSize: 12.5, color: Brand.text2, marginBottom: 12, fontFamily: Type.body },
   retryButton: {
     backgroundColor: Brand.brand,
-    borderRadius: 10,
+    borderRadius: Radius.pill,
     paddingHorizontal: 18,
     paddingVertical: 9,
   },
-  retryButtonText: { fontSize: 12.5, fontWeight: '500', color: '#fff' },
+  retryButtonText: { fontSize: 12.5, color: '#fff', fontFamily: Type.bodySemiBold },
 });

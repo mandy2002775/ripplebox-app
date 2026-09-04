@@ -1,9 +1,10 @@
+import { Feather } from '@expo/vector-icons';
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Brand } from '@/constants/theme';
+import { Brand, Radius, Shadow, Type } from '@/constants/theme';
 import { useAuth } from '@/contexts/auth-context';
 import { apiRequest } from '@/lib/api';
 import { SalonClientSummary } from '@/lib/types';
@@ -56,6 +57,7 @@ export default function ClientsScreen() {
         )}
 
         <View style={styles.searchWrap}>
+          <Feather name="search" size={15} color={Brand.text3} style={styles.searchIcon} />
           <TextInput
             style={styles.search}
             value={query}
@@ -74,7 +76,7 @@ export default function ClientsScreen() {
               </Pressable>
             </View>
           ) : isLoading ? (
-            <ActivityIndicator color={Brand.brand} style={{ marginTop: 20 }} />
+            <ActivityIndicator color={Brand.accent} style={{ marginTop: 20 }} />
           ) : filtered.length === 0 ? (
             <Text style={styles.emptyText}>
               {clients.length === 0
@@ -96,6 +98,7 @@ export default function ClientsScreen() {
                 </View>
                 {c.is_customer && (
                   <View style={styles.customerBadge}>
+                    <Feather name="check-circle" size={10} color={Brand.green} />
                     <Text style={styles.customerBadgeText}>Customer</Text>
                   </View>
                 )}
@@ -111,78 +114,80 @@ export default function ClientsScreen() {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: Brand.bg },
   safeArea: { flex: 1 },
-  header: { paddingHorizontal: 20, paddingTop: 12, marginBottom: 12 },
-  heading: { fontSize: 16, fontWeight: '500', color: Brand.brand },
-  subheading: { fontSize: 11, color: Brand.text2 },
-  statGrid: { flexDirection: 'row', gap: 8, paddingHorizontal: 20, marginBottom: 12 },
+  header: { paddingHorizontal: 20, paddingTop: 14, marginBottom: 14 },
+  heading: { fontSize: 19, color: Brand.brand, fontFamily: Type.displayBold, letterSpacing: -0.2 },
+  subheading: { fontSize: 11.5, color: Brand.text2, marginTop: 2, fontFamily: Type.body },
+  statGrid: { flexDirection: 'row', gap: 9, paddingHorizontal: 20, marginBottom: 14 },
   stat: {
     flex: 1,
-    backgroundColor: '#fff',
-    borderWidth: 0.5,
-    borderColor: Brand.border,
-    borderRadius: 14,
-    paddingVertical: 14,
+    backgroundColor: Brand.surface,
+    borderRadius: Radius.md,
+    paddingVertical: 15,
     alignItems: 'center',
+    ...Shadow.sm,
   },
-  statNumber: { fontSize: 19, fontWeight: '500', color: Brand.brand },
-  statLabel: { fontSize: 9, color: Brand.text3, marginTop: 2 },
-  searchWrap: { paddingHorizontal: 20, marginBottom: 12 },
+  statNumber: { fontSize: 20, color: Brand.brand, fontFamily: Type.displayBold },
+  statLabel: { fontSize: 9.5, color: Brand.text3, marginTop: 3, fontFamily: Type.bodyMedium },
+  searchWrap: { paddingHorizontal: 20, marginBottom: 14, justifyContent: 'center' },
+  searchIcon: { position: 'absolute', left: 33, zIndex: 1 },
   search: {
-    backgroundColor: '#fff',
-    borderWidth: 0.5,
-    borderColor: Brand.border,
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 11,
+    backgroundColor: Brand.surface,
+    borderRadius: Radius.sm,
+    paddingLeft: 38,
+    paddingRight: 14,
+    paddingVertical: 12,
     fontSize: 13.5,
     color: Brand.brand,
+    fontFamily: Type.bodyMedium,
+    ...Shadow.sm,
   },
   body: { paddingHorizontal: 20, paddingBottom: 40 },
-  emptyText: { fontSize: 12, color: Brand.text3, textAlign: 'center', marginTop: 30 },
+  emptyText: { fontSize: 12, color: Brand.text3, textAlign: 'center', marginTop: 30, fontFamily: Type.body },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
-    backgroundColor: '#fff',
-    borderWidth: 0.5,
-    borderColor: Brand.border,
-    borderRadius: 14,
-    padding: 12,
-    marginBottom: 7,
+    gap: 11,
+    backgroundColor: Brand.surface,
+    borderRadius: Radius.md,
+    padding: 13,
+    marginBottom: 8,
+    ...Shadow.sm,
   },
   avatar: {
-    width: 38,
-    height: 38,
-    borderRadius: 12,
+    width: 40,
+    height: 40,
+    borderRadius: Radius.sm,
     backgroundColor: Brand.lavender,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  avatarInitial: { fontSize: 15, fontWeight: '600', color: Brand.brand3 },
-  rowTitle: { fontSize: 12.5, fontWeight: '500', color: Brand.brand },
-  rowSub: { fontSize: 11, color: Brand.text2, marginTop: 1 },
+  avatarInitial: { fontSize: 15, color: Brand.brand3, fontFamily: Type.bodyBold },
+  rowTitle: { fontSize: 13, color: Brand.brand, fontFamily: Type.bodySemiBold },
+  rowSub: { fontSize: 11, color: Brand.text2, marginTop: 1, fontFamily: Type.body },
   customerBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
     backgroundColor: Brand.greenBg,
-    borderRadius: 20,
+    borderRadius: Radius.pill,
     paddingHorizontal: 9,
-    paddingVertical: 4,
+    paddingVertical: 4.5,
   },
-  customerBadgeText: { fontSize: 10, fontWeight: '500', color: Brand.green },
+  customerBadgeText: { fontSize: 10, color: Brand.green, fontFamily: Type.bodySemiBold },
   errorBox: {
-    backgroundColor: '#fff',
-    borderWidth: 0.5,
-    borderColor: Brand.border,
-    borderRadius: 14,
-    padding: 20,
+    backgroundColor: Brand.surface,
+    borderRadius: Radius.md,
+    padding: 22,
     alignItems: 'center',
     marginTop: 10,
+    ...Shadow.sm,
   },
-  errorBoxText: { fontSize: 12.5, color: Brand.text2, marginBottom: 12 },
+  errorBoxText: { fontSize: 12.5, color: Brand.text2, marginBottom: 12, fontFamily: Type.body },
   retryButton: {
     backgroundColor: Brand.brand,
-    borderRadius: 10,
+    borderRadius: Radius.pill,
     paddingHorizontal: 18,
     paddingVertical: 9,
   },
-  retryButtonText: { fontSize: 12.5, fontWeight: '500', color: '#fff' },
+  retryButtonText: { fontSize: 12.5, color: '#fff', fontFamily: Type.bodySemiBold },
 });

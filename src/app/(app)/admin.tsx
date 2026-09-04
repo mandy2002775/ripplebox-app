@@ -1,9 +1,10 @@
+import { Feather } from '@expo/vector-icons';
 import { Redirect, useRouter, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Brand } from '@/constants/theme';
+import { Brand, Radius, Shadow, Type } from '@/constants/theme';
 import { useAuth } from '@/contexts/auth-context';
 import { apiRequest } from '@/lib/api';
 import { AdminStats, AdminSubscriptionSummary, PlanType, SalonLead } from '@/lib/types';
@@ -65,7 +66,8 @@ export default function AdminScreen() {
             <Text style={styles.heading}>Admin panel</Text>
           </View>
           <View style={styles.adminBadge}>
-            <Text style={styles.adminBadgeText}>🛡️ {user?.name}</Text>
+            <Feather name="shield" size={11} color="#8ee8c8" />
+            <Text style={styles.adminBadgeText}>{user?.name}</Text>
           </View>
         </View>
 
@@ -150,11 +152,15 @@ export default function AdminScreen() {
           <Text style={styles.sectionLabel}>Quick actions</Text>
           <View style={styles.actionGrid}>
             <Pressable onPress={() => router.push('/reports')} style={styles.actionTile}>
-              <Text style={styles.actionIcon}>📊</Text>
+              <View style={styles.actionIconWrap}>
+                <Feather name="bar-chart-2" size={18} color={Brand.accent} />
+              </View>
               <Text style={styles.actionLabel}>Reports</Text>
             </Pressable>
             <Pressable onPress={() => router.push('/db-schema')} style={styles.actionTile}>
-              <Text style={styles.actionIcon}>🗄️</Text>
+              <View style={styles.actionIconWrap}>
+                <Feather name="database" size={18} color={Brand.accent} />
+              </View>
               <Text style={styles.actionLabel}>DB schema</Text>
             </Pressable>
           </View>
@@ -184,144 +190,155 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 20,
     paddingTop: 8,
-    marginBottom: 14,
+    marginBottom: 16,
   },
   eyebrow: {
     fontSize: 11,
     color: '#9070C0',
+    fontFamily: Type.body,
   },
   heading: {
-    fontSize: 20,
-    fontWeight: '500',
+    fontSize: 21,
     color: '#fff',
-    letterSpacing: -0.3,
-    marginTop: 2,
+    letterSpacing: -0.2,
+    marginTop: 3,
+    fontFamily: Type.displayBold,
   },
   adminBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
     backgroundColor: 'rgba(142,232,200,0.15)',
-    borderRadius: 8,
+    borderRadius: Radius.sm,
     paddingHorizontal: 10,
-    paddingVertical: 5,
+    paddingVertical: 6,
   },
   adminBadgeText: {
     fontSize: 10,
-    fontWeight: '500',
     color: '#8ee8c8',
+    fontFamily: Type.bodyMedium,
   },
   statGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
+    gap: 9,
     paddingHorizontal: 20,
-    marginBottom: 14,
+    marginBottom: 16,
   },
   stat: {
     width: '47%',
     backgroundColor: 'rgba(255,255,255,0.07)',
-    borderRadius: 11,
-    padding: 12,
+    borderRadius: Radius.md,
+    padding: 13,
   },
   statLabel: {
     fontSize: 9,
     color: '#9070C0',
-    marginBottom: 3,
+    marginBottom: 4,
+    fontFamily: Type.bodyMedium,
   },
   statNumber: {
     fontSize: 22,
-    fontWeight: '500',
     color: '#fff',
+    fontFamily: Type.displayBold,
   },
   statNumberAccent: {
     fontSize: 22,
-    fontWeight: '500',
     color: '#8ee8c8',
+    fontFamily: Type.displayBold,
   },
   statTrend: {
     fontSize: 9,
     color: '#8ee8c8',
-    marginTop: 1,
+    marginTop: 2,
+    fontFamily: Type.bodyMedium,
   },
   body: {
     flex: 1,
     backgroundColor: Brand.bg,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    borderTopLeftRadius: Radius.xl,
+    borderTopRightRadius: Radius.xl,
   },
   bodyContent: {
     paddingHorizontal: 20,
-    paddingTop: 16,
+    paddingTop: 18,
     paddingBottom: 40,
   },
   sectionLabel: {
-    fontSize: 10,
-    fontWeight: '500',
+    fontSize: 10.5,
     color: Brand.text3,
     letterSpacing: 0.5,
     textTransform: 'uppercase',
     marginBottom: 8,
     marginTop: 6,
+    fontFamily: Type.bodySemiBold,
   },
   emptyText: {
     fontSize: 12,
     color: Brand.text3,
+    fontFamily: Type.body,
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
-    backgroundColor: '#fff',
-    borderWidth: 0.5,
-    borderColor: Brand.border,
-    borderRadius: 14,
-    padding: 12,
-    marginBottom: 7,
+    backgroundColor: Brand.surface,
+    borderRadius: Radius.md,
+    padding: 13,
+    marginBottom: 8,
+    ...Shadow.sm,
   },
   rowTitle: {
-    fontSize: 12.5,
-    fontWeight: '500',
+    fontSize: 13,
     color: Brand.brand,
+    fontFamily: Type.bodySemiBold,
   },
   rowSub: {
     fontSize: 11,
     color: Brand.text2,
     marginTop: 1,
+    fontFamily: Type.body,
   },
   badge: {
-    borderRadius: 20,
-    paddingHorizontal: 9,
-    paddingVertical: 3,
+    borderRadius: Radius.pill,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
   },
   badgeText: {
     fontSize: 10,
-    fontWeight: '500',
+    fontFamily: Type.bodySemiBold,
   },
   actionGrid: {
     flexDirection: 'row',
-    gap: 8,
-    marginBottom: 16,
+    gap: 9,
+    marginBottom: 18,
   },
   actionTile: {
     flex: 1,
-    backgroundColor: '#fff',
-    borderWidth: 0.5,
-    borderColor: Brand.border,
-    borderRadius: 14,
-    paddingVertical: 16,
+    backgroundColor: Brand.surface,
+    borderRadius: Radius.md,
+    paddingVertical: 18,
     alignItems: 'center',
+    ...Shadow.sm,
   },
-  actionIcon: {
-    fontSize: 22,
+  actionIconWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: Radius.sm,
+    backgroundColor: Brand.lavender,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   actionLabel: {
     fontSize: 12,
-    fontWeight: '500',
     color: Brand.brand,
-    marginTop: 5,
+    marginTop: 8,
+    fontFamily: Type.bodySemiBold,
   },
   signOutButton: {
     borderWidth: 1.5,
     borderColor: Brand.brand,
-    borderRadius: 14,
+    borderRadius: Radius.pill,
     paddingVertical: 13,
     alignItems: 'center',
   },
@@ -330,22 +347,22 @@ const styles = StyleSheet.create({
   },
   signOutText: {
     fontSize: 14,
-    fontWeight: '500',
     color: Brand.brand,
+    fontFamily: Type.bodySemiBold,
   },
   errorBox: {
     marginHorizontal: 20,
     backgroundColor: 'rgba(255,255,255,0.07)',
-    borderRadius: 14,
+    borderRadius: Radius.md,
     padding: 20,
     alignItems: 'center',
   },
-  errorBoxText: { fontSize: 12.5, color: '#fff', marginBottom: 12 },
+  errorBoxText: { fontSize: 12.5, color: '#fff', marginBottom: 12, fontFamily: Type.body },
   retryButton: {
     backgroundColor: '#8ee8c8',
-    borderRadius: 10,
+    borderRadius: Radius.pill,
     paddingHorizontal: 18,
     paddingVertical: 9,
   },
-  retryButtonText: { fontSize: 12.5, fontWeight: '500', color: Brand.brand },
+  retryButtonText: { fontSize: 12.5, color: Brand.brand, fontFamily: Type.bodySemiBold },
 });

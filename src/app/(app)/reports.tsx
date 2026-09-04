@@ -1,9 +1,11 @@
+import { Feather } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Redirect, useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Brand } from '@/constants/theme';
+import { Brand, Radius, Shadow, Type } from '@/constants/theme';
 import { useAuth } from '@/contexts/auth-context';
 import { apiBlobRequest, apiRequest } from '@/lib/api';
 import { saveBlob } from '@/lib/download';
@@ -67,7 +69,7 @@ export default function ReportsScreen() {
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.header}>
           <Pressable onPress={() => router.back()} style={styles.backButton}>
-            <Text style={styles.backButtonText}>{'‹'}</Text>
+            <Feather name="chevron-left" size={18} color={Brand.brand} />
           </Pressable>
           <View style={{ flex: 1 }}>
             <Text style={styles.heading}>Reports</Text>
@@ -96,7 +98,7 @@ export default function ReportsScreen() {
             </Pressable>
           </View>
         ) : isLoading || !report ? (
-          <ActivityIndicator color={Brand.brand} style={{ marginTop: 20 }} />
+          <ActivityIndicator color={Brand.accent} style={{ marginTop: 20 }} />
         ) : (
           <ScrollView contentContainerStyle={styles.body}>
             <View style={styles.metricGrid}>
@@ -170,15 +172,21 @@ export default function ReportsScreen() {
 
             {exportError && <Text style={styles.error}>{exportError}</Text>}
 
-            <Pressable
-              disabled={isExporting !== null}
-              onPress={() => handleExport('csv')}
-              style={({ pressed }) => [styles.exportButton, pressed && styles.pressed]}>
-              {isExporting === 'csv' ? (
-                <ActivityIndicator color="#fff" />
-              ) : (
-                <Text style={styles.exportButtonText}>⬇ Export full report as CSV</Text>
-              )}
+            <Pressable disabled={isExporting !== null} onPress={() => handleExport('csv')}>
+              <LinearGradient
+                colors={[Brand.roseVivid, Brand.accent]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={[styles.exportButton, isExporting === 'csv' && styles.pressed]}>
+                {isExporting === 'csv' ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <>
+                    <Feather name="download" size={13} color="#fff" />
+                    <Text style={styles.exportButtonText}>Export full report as CSV</Text>
+                  </>
+                )}
+              </LinearGradient>
             </Pressable>
             <Pressable
               disabled={isExporting !== null}
@@ -187,7 +195,10 @@ export default function ReportsScreen() {
               {isExporting === 'pdf' ? (
                 <ActivityIndicator color={Brand.brand} />
               ) : (
-                <Text style={styles.exportButtonGhostText}>⬇ Export as PDF</Text>
+                <>
+                  <Feather name="download" size={13} color={Brand.brand} />
+                  <Text style={styles.exportButtonGhostText}>Export as PDF</Text>
+                </>
               )}
             </Pressable>
           </ScrollView>
@@ -203,24 +214,22 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
+    gap: 11,
     paddingHorizontal: 20,
-    paddingTop: 12,
+    paddingTop: 14,
     marginBottom: 14,
   },
   backButton: {
-    width: 30,
-    height: 30,
-    borderRadius: 8,
-    backgroundColor: '#fff',
-    borderWidth: 0.5,
-    borderColor: Brand.border,
+    width: 34,
+    height: 34,
+    borderRadius: Radius.sm,
+    backgroundColor: Brand.surface,
     alignItems: 'center',
     justifyContent: 'center',
+    ...Shadow.sm,
   },
-  backButtonText: { fontSize: 18, color: Brand.brand, marginTop: -2 },
-  heading: { fontSize: 16, fontWeight: '500', color: Brand.brand },
-  subheading: { fontSize: 11, color: Brand.text2 },
+  heading: { fontSize: 18, color: Brand.brand, fontFamily: Type.displayBold, letterSpacing: -0.2 },
+  subheading: { fontSize: 11, color: Brand.text2, marginTop: 1, fontFamily: Type.body },
   rangeRow: {
     flexDirection: 'row',
     gap: 6,
@@ -229,53 +238,51 @@ const styles = StyleSheet.create({
   },
   rangeChip: {
     flex: 1,
-    paddingVertical: 7,
-    borderRadius: 8,
-    backgroundColor: '#fff',
-    borderWidth: 0.5,
-    borderColor: Brand.border,
+    paddingVertical: 8,
+    borderRadius: Radius.sm,
+    backgroundColor: Brand.surface,
     alignItems: 'center',
+    ...Shadow.sm,
   },
   rangeChipActive: {
     backgroundColor: Brand.brand,
-    borderColor: Brand.brand,
+    shadowOpacity: 0,
+    elevation: 0,
   },
-  rangeText: { fontSize: 11, color: Brand.text2 },
-  rangeTextActive: { color: '#fff', fontWeight: '500' },
+  rangeText: { fontSize: 11, color: Brand.text2, fontFamily: Type.bodyMedium },
+  rangeTextActive: { color: '#fff', fontFamily: Type.bodySemiBold },
   body: { paddingHorizontal: 20, paddingBottom: 40 },
   metricGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
-    marginBottom: 14,
+    gap: 9,
+    marginBottom: 16,
   },
   metric: {
     width: '47%',
-    backgroundColor: '#fff',
-    borderWidth: 0.5,
-    borderColor: Brand.border,
-    borderRadius: 14,
-    padding: 13,
+    backgroundColor: Brand.surface,
+    borderRadius: Radius.md,
+    padding: 14,
+    ...Shadow.sm,
   },
-  metricLabel: { fontSize: 10, color: Brand.text3, marginBottom: 4 },
-  metricNumber: { fontSize: 22, fontWeight: '500', color: Brand.brand },
-  metricNumberGreen: { fontSize: 22, fontWeight: '500', color: Brand.green },
+  metricLabel: { fontSize: 10, color: Brand.text3, marginBottom: 5, fontFamily: Type.bodyMedium },
+  metricNumber: { fontSize: 22, color: Brand.brand, fontFamily: Type.displayBold },
+  metricNumberGreen: { fontSize: 22, color: Brand.green, fontFamily: Type.displayBold },
   sectionLabel: {
-    fontSize: 10,
-    fontWeight: '500',
+    fontSize: 10.5,
     color: Brand.text3,
     letterSpacing: 0.5,
     textTransform: 'uppercase',
     marginTop: 6,
     marginBottom: 8,
+    fontFamily: Type.bodySemiBold,
   },
   chartCard: {
-    backgroundColor: '#fff',
-    borderWidth: 0.5,
-    borderColor: Brand.border,
-    borderRadius: 14,
-    padding: 14,
-    marginBottom: 12,
+    backgroundColor: Brand.surface,
+    borderRadius: Radius.md,
+    padding: 15,
+    marginBottom: 14,
+    ...Shadow.sm,
   },
   chartRow: {
     flexDirection: 'row',
@@ -299,7 +306,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     backgroundColor: Brand.accent,
   },
-  chartDay: { fontSize: 9, color: Brand.text3 },
+  chartDay: { fontSize: 9, color: Brand.text3, fontFamily: Type.bodyMedium },
   chartLegend: {
     flexDirection: 'row',
     gap: 12,
@@ -315,65 +322,70 @@ const styles = StyleSheet.create({
     height: 10,
     borderRadius: 2,
   },
-  legendText: { fontSize: 10, color: Brand.text2 },
-  emptyText: { fontSize: 12, color: Brand.text3, marginBottom: 10 },
+  legendText: { fontSize: 10, color: Brand.text2, fontFamily: Type.bodyMedium },
+  emptyText: { fontSize: 12, color: Brand.text3, marginBottom: 10, fontFamily: Type.body },
   topRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
-    backgroundColor: '#fff',
-    borderWidth: 0.5,
-    borderColor: Brand.border,
-    borderRadius: 14,
-    padding: 12,
-    marginBottom: 7,
+    backgroundColor: Brand.surface,
+    borderRadius: Radius.md,
+    padding: 13,
+    marginBottom: 8,
+    ...Shadow.sm,
   },
   rankBadge: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
     backgroundColor: Brand.lavender,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  rankBadgeText: { fontSize: 11, fontWeight: '500', color: Brand.accent },
-  topName: { flex: 1, fontSize: 12.5, fontWeight: '500', color: Brand.brand },
-  topCount: { fontSize: 12.5, fontWeight: '500', color: Brand.brand },
-  error: { fontSize: 12, color: Brand.red, marginBottom: 8 },
+  rankBadgeText: { fontSize: 11, color: Brand.accent, fontFamily: Type.bodyBold },
+  topName: { flex: 1, fontSize: 13, color: Brand.brand, fontFamily: Type.bodySemiBold },
+  topCount: { fontSize: 13, color: Brand.brand, fontFamily: Type.bodySemiBold },
+  error: { fontSize: 12, color: Brand.red, marginBottom: 8, fontFamily: Type.body },
   exportButton: {
-    backgroundColor: Brand.brand,
-    borderRadius: 14,
-    paddingVertical: 14,
+    flexDirection: 'row',
+    justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 6,
+    gap: 8,
+    borderRadius: Radius.pill,
+    paddingVertical: 15,
+    marginTop: 8,
+    ...Shadow.md,
+    shadowColor: Brand.accent,
   },
-  exportButtonText: { color: '#fff', fontSize: 13, fontWeight: '500' },
+  exportButtonText: { color: '#fff', fontSize: 13, fontFamily: Type.bodySemiBold },
   exportButtonGhost: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 8,
     borderWidth: 1.5,
     borderColor: Brand.brand,
-    borderRadius: 14,
-    paddingVertical: 12,
-    alignItems: 'center',
-    marginTop: 8,
+    borderRadius: Radius.pill,
+    paddingVertical: 13,
+    marginTop: 9,
   },
-  exportButtonGhostText: { color: Brand.brand, fontSize: 13, fontWeight: '500' },
+  exportButtonGhostText: { color: Brand.brand, fontSize: 13, fontFamily: Type.bodySemiBold },
   pressed: { opacity: 0.85 },
   errorBox: {
     marginHorizontal: 20,
-    backgroundColor: '#fff',
-    borderWidth: 0.5,
-    borderColor: Brand.border,
-    borderRadius: 14,
-    padding: 20,
+    backgroundColor: Brand.surface,
+    borderRadius: Radius.md,
+    padding: 22,
     alignItems: 'center',
     marginTop: 20,
+    ...Shadow.sm,
   },
-  errorBoxText: { fontSize: 12.5, color: Brand.text2, marginBottom: 12 },
+  errorBoxText: { fontSize: 12.5, color: Brand.text2, marginBottom: 12, fontFamily: Type.body },
   retryButton: {
     backgroundColor: Brand.brand,
-    borderRadius: 10,
+    borderRadius: Radius.pill,
     paddingHorizontal: 18,
     paddingVertical: 9,
   },
-  retryButtonText: { fontSize: 12.5, fontWeight: '500', color: '#fff' },
+  retryButtonText: { fontSize: 12.5, color: '#fff', fontFamily: Type.bodySemiBold },
 });

@@ -1,8 +1,9 @@
+import { Feather } from '@expo/vector-icons';
 import { Redirect, useRouter } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Brand } from '@/constants/theme';
+import { Brand, Radius, Shadow, Type } from '@/constants/theme';
 import { useAuth } from '@/contexts/auth-context';
 
 type Field = { name: string; type: string; kind?: 'pk' | 'fk' };
@@ -165,7 +166,7 @@ export default function DbSchemaScreen() {
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.header}>
           <Pressable onPress={() => router.back()} style={styles.backButton}>
-            <Text style={styles.backButtonText}>{'‹'}</Text>
+            <Feather name="chevron-left" size={18} color={Brand.brand} />
           </Pressable>
           <View>
             <Text style={styles.heading}>Database schema</Text>
@@ -233,27 +234,24 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   backButton: {
-    width: 30,
-    height: 30,
-    borderRadius: 8,
-    backgroundColor: '#fff',
-    borderWidth: 0.5,
-    borderColor: Brand.border,
+    width: 34,
+    height: 34,
+    borderRadius: Radius.sm,
+    backgroundColor: Brand.surface,
     alignItems: 'center',
     justifyContent: 'center',
+    ...Shadow.sm,
   },
-  backButtonText: { fontSize: 18, color: Brand.brand, marginTop: -2 },
-  heading: { fontSize: 16, fontWeight: '500', color: Brand.brand },
-  subheading: { fontSize: 11, color: Brand.text2 },
+  heading: { fontSize: 17, color: Brand.brand, fontFamily: Type.displayBold, letterSpacing: -0.2 },
+  subheading: { fontSize: 11, color: Brand.text2, marginTop: 1, fontFamily: Type.body },
   body: { paddingHorizontal: 20, paddingBottom: 40 },
-  intro: { fontSize: 11, color: Brand.text2, lineHeight: 16, marginBottom: 12 },
+  intro: { fontSize: 11.5, color: Brand.text2, lineHeight: 17, marginBottom: 14, fontFamily: Type.body },
   card: {
-    backgroundColor: '#fff',
-    borderWidth: 0.5,
-    borderColor: Brand.border,
-    borderRadius: 14,
+    backgroundColor: Brand.surface,
+    borderRadius: Radius.md,
     overflow: 'hidden',
-    marginBottom: 8,
+    marginBottom: 9,
+    ...Shadow.sm,
   },
   cardHeader: {
     flexDirection: 'row',
@@ -297,21 +295,22 @@ const styles = StyleSheet.create({
   },
   legend: {
     backgroundColor: Brand.lavender,
-    borderRadius: 12,
-    padding: 13,
+    borderRadius: Radius.md,
+    padding: 14,
     marginTop: 6,
     marginBottom: 20,
   },
   legendTitle: {
     fontSize: 11,
-    fontWeight: '500',
     color: Brand.brand3,
-    marginBottom: 6,
+    marginBottom: 7,
+    fontFamily: Type.bodySemiBold,
   },
   legendLine: {
     fontSize: 11,
     color: Brand.brand,
     marginBottom: 4,
+    fontFamily: Type.body,
   },
   legendPk: {
     fontFamily: 'monospace',

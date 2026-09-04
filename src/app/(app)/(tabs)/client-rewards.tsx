@@ -1,9 +1,10 @@
+import { Feather } from '@expo/vector-icons';
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Brand } from '@/constants/theme';
+import { Brand, Radius, Shadow, Type } from '@/constants/theme';
 import { useAuth } from '@/contexts/auth-context';
 import { apiRequest } from '@/lib/api';
 import { ClientDashboard } from '@/lib/types';
@@ -45,7 +46,7 @@ export default function ClientRewardsScreen() {
               </Pressable>
             </View>
           ) : isLoading || !dashboard ? (
-            <ActivityIndicator color={Brand.brand} style={{ marginTop: 20 }} />
+            <ActivityIndicator color={Brand.accent} style={{ marginTop: 20 }} />
           ) : (
             <>
               <View style={styles.statGrid}>
@@ -68,7 +69,7 @@ export default function ClientRewardsScreen() {
                 dashboard.redemptions.map((r) => (
                   <View key={r.id} style={styles.row}>
                     <View style={styles.rewardIcon}>
-                      <Text style={styles.rewardIconText}>🎁</Text>
+                      <Feather name="gift" size={15} color={Brand.amber} />
                     </View>
                     <View style={{ flex: 1 }}>
                       <Text style={styles.rowTitle}>{r.description}</Text>
@@ -90,68 +91,64 @@ export default function ClientRewardsScreen() {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: Brand.bg },
   safeArea: { flex: 1 },
-  header: { paddingHorizontal: 20, paddingTop: 12, marginBottom: 14 },
-  heading: { fontSize: 16, fontWeight: '500', color: Brand.brand },
-  subheading: { fontSize: 11, color: Brand.text2 },
+  header: { paddingHorizontal: 20, paddingTop: 14, marginBottom: 16 },
+  heading: { fontSize: 19, color: Brand.brand, fontFamily: Type.displayBold, letterSpacing: -0.2 },
+  subheading: { fontSize: 11.5, color: Brand.text2, marginTop: 2, fontFamily: Type.body },
   body: { paddingHorizontal: 20, paddingBottom: 40 },
-  statGrid: { flexDirection: 'row', gap: 8, marginBottom: 18 },
+  statGrid: { flexDirection: 'row', gap: 9, marginBottom: 20 },
   stat: {
     flex: 1,
-    backgroundColor: '#fff',
-    borderWidth: 0.5,
-    borderColor: Brand.border,
-    borderRadius: 14,
-    paddingVertical: 16,
+    backgroundColor: Brand.surface,
+    borderRadius: Radius.md,
+    paddingVertical: 17,
     alignItems: 'center',
+    ...Shadow.sm,
   },
-  statNumber: { fontSize: 22, fontWeight: '500', color: Brand.brand },
-  statLabel: { fontSize: 10, color: Brand.text3, marginTop: 2 },
+  statNumber: { fontSize: 23, color: Brand.brand, fontFamily: Type.displayBold },
+  statLabel: { fontSize: 10, color: Brand.text3, marginTop: 3, fontFamily: Type.bodyMedium },
   sectionLabel: {
-    fontSize: 10,
-    fontWeight: '500',
+    fontSize: 10.5,
     color: Brand.text3,
     letterSpacing: 0.5,
     textTransform: 'uppercase',
     marginBottom: 8,
+    fontFamily: Type.bodySemiBold,
   },
-  emptyText: { fontSize: 12, color: Brand.text3, marginTop: 4 },
+  emptyText: { fontSize: 12, color: Brand.text3, marginTop: 4, fontFamily: Type.body },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    backgroundColor: '#fff',
-    borderWidth: 0.5,
-    borderColor: Brand.border,
-    borderRadius: 14,
-    padding: 12,
-    marginBottom: 7,
+    backgroundColor: Brand.surface,
+    borderRadius: Radius.md,
+    padding: 13,
+    marginBottom: 8,
+    ...Shadow.sm,
   },
   rewardIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 11,
+    width: 38,
+    height: 38,
+    borderRadius: Radius.sm,
     backgroundColor: Brand.amberBg,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  rewardIconText: { fontSize: 16 },
-  rowTitle: { fontSize: 12.5, fontWeight: '500', color: Brand.brand },
-  rowSub: { fontSize: 11, color: Brand.text2, marginTop: 1 },
+  rowTitle: { fontSize: 13, color: Brand.brand, fontFamily: Type.bodySemiBold },
+  rowSub: { fontSize: 11, color: Brand.text2, marginTop: 1, fontFamily: Type.body },
   errorBox: {
-    backgroundColor: '#fff',
-    borderWidth: 0.5,
-    borderColor: Brand.border,
-    borderRadius: 14,
-    padding: 20,
+    backgroundColor: Brand.surface,
+    borderRadius: Radius.md,
+    padding: 22,
     alignItems: 'center',
     marginTop: 10,
+    ...Shadow.sm,
   },
-  errorBoxText: { fontSize: 12.5, color: Brand.text2, marginBottom: 12 },
+  errorBoxText: { fontSize: 12.5, color: Brand.text2, marginBottom: 12, fontFamily: Type.body },
   retryButton: {
     backgroundColor: Brand.brand,
-    borderRadius: 10,
+    borderRadius: Radius.pill,
     paddingHorizontal: 18,
     paddingVertical: 9,
   },
-  retryButtonText: { fontSize: 12.5, fontWeight: '500', color: '#fff' },
+  retryButtonText: { fontSize: 12.5, color: '#fff', fontFamily: Type.bodySemiBold },
 });

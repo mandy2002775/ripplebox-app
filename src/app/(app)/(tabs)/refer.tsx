@@ -1,11 +1,13 @@
+import { Feather } from '@expo/vector-icons';
 import * as Clipboard from 'expo-clipboard';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 import { ActivityIndicator, Linking, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { StatusBadge } from '@/components/status-badge';
-import { Brand } from '@/constants/theme';
+import { Brand, Radius, Shadow, Type } from '@/constants/theme';
 import { useAuth } from '@/contexts/auth-context';
 import { apiRequest } from '@/lib/api';
 import { ClientDashboard, ReferralStatus } from '@/lib/types';
@@ -17,6 +19,13 @@ const FILTERS: { value: FilterTab; label: string }[] = [
   { value: 'pending', label: 'Pending' },
   { value: 'engaged', label: 'Engaged' },
   { value: 'redeemed', label: 'Redeemed' },
+];
+
+const SHARE_ACTIONS: { key: string; icon: keyof typeof Feather.glyphMap; label: string }[] = [
+  { key: 'share', icon: 'share', label: 'Share' },
+  { key: 'whatsapp', icon: 'message-circle', label: 'WhatsApp' },
+  { key: 'email', icon: 'mail', label: 'Email' },
+  { key: 'copy', icon: 'copy', label: 'Copy' },
 ];
 
 export default function ReferScreen() {
@@ -69,6 +78,13 @@ export default function ReferScreen() {
     }
   }
 
+  const handlers: Record<string, () => void> = {
+    share: handleShare,
+    whatsapp: handleShareWhatsApp,
+    email: handleShareEmail,
+    copy: handleCopyCode,
+  };
+
   const referrals = dashboard?.referrals ?? [];
   const filtered = useMemo(
     () => (filter === 'all' ? referrals : referrals.filter((r) => r.status === filter)),
@@ -84,7 +100,11 @@ export default function ReferScreen() {
         </View>
 
         <ScrollView contentContainerStyle={styles.body}>
-          <View style={styles.heroCard}>
+          <LinearGradient
+            colors={[Brand.roseVivid, Brand.accent, Brand.brand3]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.heroCard}>
             <Text style={styles.heroLabel}>Your referral code</Text>
             <Text style={styles.heroCode}>{code}</Text>
             <Text style={styles.heroHint}>
@@ -92,20 +112,20 @@ export default function ReferScreen() {
               get rewarded.
             </Text>
             <View style={styles.shareGrid}>
-              <Pressable onPress={handleShare} style={styles.shareBtn}>
-                <Text style={styles.shareBtnText}>📤 Share</Text>
-              </Pressable>
-              <Pressable onPress={handleShareWhatsApp} style={styles.shareBtn}>
-                <Text style={styles.shareBtnText}>💬 WhatsApp</Text>
-              </Pressable>
-              <Pressable onPress={handleShareEmail} style={styles.shareBtn}>
-                <Text style={styles.shareBtnText}>✉️ Email</Text>
-              </Pressable>
-              <Pressable onPress={handleCopyCode} style={styles.shareBtn}>
-                <Text style={styles.shareBtnText}>{isCopied ? '✓ Copied' : '📋 Copy'}</Text>
-              </Pressable>
+              {SHARE_ACTIONS.map((a) => (
+                <Pressable key={a.key} onPress={handlers[a.key]} style={styles.shareBtn}>
+                  <Feather
+                    name={a.key === 'copy' && isCopied ? 'check' : a.icon}
+                    size={12}
+                    color="#fff"
+                  />
+                  <Text style={styles.shareBtnText}>
+                    {a.key === 'copy' && isCopied ? 'Copied' : a.label}
+                  </Text>
+                </Pressable>
+              ))}
             </View>
-          </View>
+          </LinearGradient>
 
           <View style={styles.tabRow}>
             {FILTERS.map((f) => (
@@ -128,7 +148,7 @@ export default function ReferScreen() {
               </Pressable>
             </View>
           ) : isLoading ? (
-            <ActivityIndicator color={Brand.brand} style={{ marginTop: 20 }} />
+            <ActivityIndicator color={Brand.accent} style={{ marginTop: 20 }} />
           ) : filtered.length === 0 ? (
             <Text style={styles.emptyText}>
               {referrals.length === 0
@@ -157,69 +177,70 @@ export default function ReferScreen() {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: Brand.bg },
   safeArea: { flex: 1 },
-  header: { paddingHorizontal: 20, paddingTop: 12, marginBottom: 12 },
-  heading: { fontSize: 16, fontWeight: '500', color: Brand.brand },
-  subheading: { fontSize: 11, color: Brand.text2 },
+  header: { paddingHorizontal: 20, paddingTop: 14, marginBottom: 14 },
+  heading: { fontSize: 19, color: Brand.brand, fontFamily: Type.displayBold, letterSpacing: -0.2 },
+  subheading: { fontSize: 11.5, color: Brand.text2, marginTop: 2, fontFamily: Type.body },
   body: { paddingHorizontal: 20, paddingBottom: 40 },
   heroCard: {
-    backgroundColor: Brand.rose,
-    borderRadius: 18,
-    padding: 20,
-    marginBottom: 16,
+    borderRadius: Radius.lg,
+    padding: 21,
+    marginBottom: 18,
+    ...Shadow.md,
+    shadowColor: Brand.accent,
   },
-  heroLabel: { fontSize: 11, color: '#D0B8CC', marginBottom: 6 },
-  heroCode: { fontSize: 30, fontWeight: '500', color: '#fff', letterSpacing: 5, marginBottom: 10 },
-  heroHint: { fontSize: 12, color: 'rgba(255,255,255,0.75)', lineHeight: 17, marginBottom: 16 },
-  shareGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 7 },
+  heroLabel: { fontSize: 11, color: 'rgba(255,255,255,0.75)', marginBottom: 7, fontFamily: Type.bodyMedium },
+  heroCode: { fontSize: 31, color: '#fff', letterSpacing: 5, marginBottom: 12, fontFamily: Type.displayBold },
+  heroHint: { fontSize: 12, color: 'rgba(255,255,255,0.78)', lineHeight: 17, marginBottom: 17, fontFamily: Type.body },
+  shareGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   shareBtn: {
-    backgroundColor: 'rgba(255,255,255,0.12)',
-    borderRadius: 10,
-    paddingHorizontal: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: 'rgba(255,255,255,0.14)',
+    borderRadius: Radius.pill,
+    paddingHorizontal: 13,
     paddingVertical: 9,
   },
-  shareBtnText: { fontSize: 11.5, fontWeight: '500', color: '#fff' },
-  tabRow: { flexDirection: 'row', gap: 5, marginBottom: 12 },
+  shareBtnText: { fontSize: 11.5, color: '#fff', fontFamily: Type.bodySemiBold },
+  tabRow: { flexDirection: 'row', gap: 6, marginBottom: 14 },
   tab: {
     flex: 1,
-    paddingVertical: 7,
-    borderRadius: 10,
-    borderWidth: 0.5,
-    borderColor: Brand.border,
-    backgroundColor: '#fff',
+    paddingVertical: 8,
+    borderRadius: Radius.sm,
+    backgroundColor: Brand.surface,
     alignItems: 'center',
+    ...Shadow.sm,
   },
-  tabActive: { backgroundColor: Brand.brand, borderColor: Brand.brand },
-  tabText: { fontSize: 11, color: Brand.text2 },
-  tabTextActive: { color: '#fff', fontWeight: '500' },
-  emptyText: { fontSize: 12, color: Brand.text3, textAlign: 'center', marginTop: 30 },
+  tabActive: { backgroundColor: Brand.brand, shadowOpacity: 0, elevation: 0 },
+  tabText: { fontSize: 11, color: Brand.text2, fontFamily: Type.bodyMedium },
+  tabTextActive: { color: '#fff', fontFamily: Type.bodySemiBold },
+  emptyText: { fontSize: 12, color: Brand.text3, textAlign: 'center', marginTop: 30, fontFamily: Type.body },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
-    backgroundColor: '#fff',
-    borderWidth: 0.5,
-    borderColor: Brand.border,
-    borderRadius: 14,
-    padding: 12,
-    marginBottom: 7,
+    backgroundColor: Brand.surface,
+    borderRadius: Radius.md,
+    padding: 13,
+    marginBottom: 8,
+    ...Shadow.sm,
   },
-  rowTitle: { fontSize: 12.5, fontWeight: '500', color: Brand.brand },
-  rowSub: { fontSize: 11, color: Brand.text2, marginTop: 1 },
+  rowTitle: { fontSize: 13, color: Brand.brand, fontFamily: Type.bodySemiBold },
+  rowSub: { fontSize: 11, color: Brand.text2, marginTop: 1, fontFamily: Type.body },
   errorBox: {
-    backgroundColor: '#fff',
-    borderWidth: 0.5,
-    borderColor: Brand.border,
-    borderRadius: 14,
-    padding: 20,
+    backgroundColor: Brand.surface,
+    borderRadius: Radius.md,
+    padding: 22,
     alignItems: 'center',
     marginTop: 10,
+    ...Shadow.sm,
   },
-  errorBoxText: { fontSize: 12.5, color: Brand.text2, marginBottom: 12 },
+  errorBoxText: { fontSize: 12.5, color: Brand.text2, marginBottom: 12, fontFamily: Type.body },
   retryButton: {
     backgroundColor: Brand.brand,
-    borderRadius: 10,
+    borderRadius: Radius.pill,
     paddingHorizontal: 18,
     paddingVertical: 9,
   },
-  retryButtonText: { fontSize: 12.5, fontWeight: '500', color: '#fff' },
+  retryButtonText: { fontSize: 12.5, color: '#fff', fontFamily: Type.bodySemiBold },
 });

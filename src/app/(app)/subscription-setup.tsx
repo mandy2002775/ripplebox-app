@@ -1,3 +1,5 @@
+import { Feather } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
@@ -11,7 +13,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Brand } from '@/constants/theme';
+import { Brand, Radius, Shadow, Type } from '@/constants/theme';
 import { useAuth } from '@/contexts/auth-context';
 import { apiRequest, ApiError } from '@/lib/api';
 import { PlanType, SalonSubscription } from '@/lib/types';
@@ -74,7 +76,8 @@ export default function SubscriptionSetupScreen() {
             <Text style={styles.subheading}>Step 2 of 2 — Payment</Text>
           </View>
           <View style={styles.secureBadge}>
-            <Text style={styles.secureBadgeText}>🔒 Secured by Stripe</Text>
+            <Feather name="lock" size={10} color="#8ee8c8" />
+            <Text style={styles.secureBadgeText}>Secured by Stripe</Text>
           </View>
         </View>
         <View style={styles.progress}>
@@ -105,9 +108,10 @@ export default function SubscriptionSetupScreen() {
           <View style={styles.includedBox}>
             <Text style={styles.includedTitle}>What's included</Text>
             {INCLUDED.map((item) => (
-              <Text key={item} style={styles.includedItem}>
-                ✓ {item}
-              </Text>
+              <View key={item} style={styles.includedRow}>
+                <Feather name="check" size={12} color={Brand.green} />
+                <Text style={styles.includedItem}>{item}</Text>
+              </View>
             ))}
           </View>
 
@@ -141,24 +145,27 @@ export default function SubscriptionSetupScreen() {
             placeholderTextColor={Brand.text3}
           />
 
-          <Text style={styles.disclaimer}>
-            🛡️ Payments processed securely by Stripe. We never store card details.
-          </Text>
+          <View style={styles.disclaimerRow}>
+            <Feather name="shield" size={11} color={Brand.text3} />
+            <Text style={styles.disclaimer}>
+              Payments processed securely by Stripe. We never store card details.
+            </Text>
+          </View>
 
           {error && <Text style={styles.error}>{error}</Text>}
 
-          <Pressable
-            disabled={isSubmitting}
-            onPress={handleStartTrial}
-            style={({ pressed }) => [
-              styles.button,
-              (pressed || isSubmitting) && styles.buttonDisabled,
-            ]}>
-            {isSubmitting ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <Text style={styles.buttonText}>Start free trial</Text>
-            )}
+          <Pressable disabled={isSubmitting} onPress={handleStartTrial}>
+            <LinearGradient
+              colors={[Brand.roseVivid, Brand.accent]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={[styles.button, isSubmitting && styles.buttonDisabled]}>
+              {isSubmitting ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={styles.buttonText}>Start free trial</Text>
+              )}
+            </LinearGradient>
           </Pressable>
         </ScrollView>
       </SafeAreaView>
@@ -183,24 +190,29 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   heading: {
-    fontSize: 16,
-    fontWeight: '500',
+    fontSize: 18,
     color: '#fff',
+    fontFamily: Type.displayBold,
   },
   subheading: {
     fontSize: 11,
     color: '#8060B0',
     marginTop: 2,
+    fontFamily: Type.body,
   },
   secureBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
     backgroundColor: 'rgba(255,255,255,0.08)',
-    borderRadius: 8,
-    paddingHorizontal: 9,
-    paddingVertical: 5,
+    borderRadius: Radius.sm,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
   },
   secureBadgeText: {
     fontSize: 10,
     color: '#8ee8c8',
+    fontFamily: Type.bodyMedium,
   },
   progress: {
     marginHorizontal: 20,
@@ -217,48 +229,50 @@ const styles = StyleSheet.create({
   },
   body: {
     backgroundColor: Brand.bg,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    borderTopLeftRadius: Radius.xl,
+    borderTopRightRadius: Radius.xl,
     paddingHorizontal: 20,
-    paddingTop: 18,
+    paddingTop: 20,
     paddingBottom: 40,
     flexGrow: 1,
   },
   planRow: {
     flexDirection: 'row',
-    gap: 8,
-    marginBottom: 14,
+    gap: 9,
+    marginBottom: 16,
   },
   planCard: {
     flex: 1,
-    backgroundColor: '#fff',
-    borderWidth: 0.5,
-    borderColor: Brand.border,
-    borderRadius: 14,
-    paddingVertical: 12,
+    backgroundColor: Brand.surface,
+    borderRadius: Radius.md,
+    paddingVertical: 14,
     paddingHorizontal: 10,
     alignItems: 'center',
+    ...Shadow.sm,
   },
   planCardActive: {
-    borderWidth: 1.5,
-    borderColor: Brand.brand,
     backgroundColor: Brand.lavender,
+    borderWidth: 1.5,
+    borderColor: Brand.accent,
+    shadowOpacity: 0,
+    elevation: 0,
   },
   planBadge: {
     backgroundColor: Brand.greenBg,
-    borderRadius: 6,
-    paddingHorizontal: 6,
+    borderRadius: Radius.sm,
+    paddingHorizontal: 7,
     paddingVertical: 2,
-    marginBottom: 4,
+    marginBottom: 5,
   },
   planBadgeText: {
     fontSize: 10,
     color: Brand.green,
+    fontFamily: Type.bodyMedium,
   },
   planPrice: {
-    fontSize: 19,
-    fontWeight: '500',
+    fontSize: 20,
     color: Brand.text2,
+    fontFamily: Type.displayBold,
   },
   planPriceActive: {
     color: Brand.brand,
@@ -266,40 +280,47 @@ const styles = StyleSheet.create({
   planNote: {
     fontSize: 9,
     color: Brand.text3,
-    marginTop: 1,
+    marginTop: 2,
+    fontFamily: Type.bodyMedium,
   },
   includedBox: {
     backgroundColor: Brand.lavender,
-    borderRadius: 12,
-    padding: 14,
-    marginBottom: 16,
+    borderRadius: Radius.md,
+    padding: 15,
+    marginBottom: 18,
   },
   includedTitle: {
     fontSize: 11,
-    fontWeight: '500',
     color: Brand.brand3,
-    marginBottom: 7,
+    marginBottom: 9,
+    fontFamily: Type.bodySemiBold,
+  },
+  includedRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 7,
+    marginBottom: 6,
   },
   includedItem: {
-    fontSize: 11,
+    fontSize: 11.5,
     color: Brand.brand,
-    marginBottom: 5,
+    fontFamily: Type.bodyMedium,
   },
   fieldLabel: {
     fontSize: 11,
-    fontWeight: '500',
     color: Brand.accent,
-    marginBottom: 5,
+    marginBottom: 6,
+    fontFamily: Type.bodySemiBold,
   },
   cardNumber: {
-    backgroundColor: Brand.lavender,
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 10,
+    backgroundColor: Brand.surface,
+    borderRadius: Radius.md,
+    padding: 17,
+    marginBottom: 11,
+    ...Shadow.sm,
   },
   cardNumberText: {
     fontSize: 18,
-    fontWeight: '500',
     color: Brand.brand,
     letterSpacing: 3,
     fontFamily: 'monospace',
@@ -307,44 +328,55 @@ const styles = StyleSheet.create({
   },
   row: {
     flexDirection: 'row',
-    gap: 8,
+    gap: 9,
   },
   half: {
     flex: 1,
   },
   input: {
-    backgroundColor: Brand.lavender,
-    borderRadius: 11,
+    backgroundColor: Brand.surface,
+    borderRadius: Radius.sm,
     paddingHorizontal: 14,
     paddingVertical: 12,
     fontSize: 14,
     color: Brand.brand,
-    marginBottom: 9,
+    marginBottom: 10,
+    fontFamily: Type.bodyMedium,
+    ...Shadow.sm,
+  },
+  disclaimerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    marginTop: 3,
+    marginBottom: 14,
   },
   disclaimer: {
     fontSize: 10,
     color: Brand.text3,
-    textAlign: 'center',
-    marginTop: 2,
-    marginBottom: 12,
+    fontFamily: Type.body,
   },
   error: {
     fontSize: 12,
     color: Brand.red,
     marginBottom: 10,
+    textAlign: 'center',
+    fontFamily: Type.body,
   },
   button: {
-    backgroundColor: Brand.brand,
-    borderRadius: 14,
-    paddingVertical: 14,
+    borderRadius: Radius.pill,
+    paddingVertical: 15.5,
     alignItems: 'center',
+    ...Shadow.md,
+    shadowColor: Brand.accent,
   },
   buttonDisabled: {
-    opacity: 0.5,
+    opacity: 0.6,
   },
   buttonText: {
     color: '#fff',
-    fontSize: 14,
-    fontWeight: '500',
+    fontSize: 14.5,
+    fontFamily: Type.bodySemiBold,
   },
 });
