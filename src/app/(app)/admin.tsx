@@ -49,6 +49,16 @@ export default function AdminScreen() {
 
   useFocusEffect(useCallback(() => { load(); }, [load]));
 
+  async function deleteLead(lead: SalonLead) {
+    setLeads((prev) => prev.filter((l) => l.id !== lead.id));
+    try {
+      await apiRequest(`/admin/leads/${lead.id}`, { method: 'DELETE', token });
+    } catch {
+      // Roll back on failure — same optimistic-update pattern as elsewhere.
+      setLeads((prev) => [...prev, lead].sort((a, b) => b.created_at.localeCompare(a.created_at)));
+    }
+  }
+
   // Only reachable via index.tsx's own redirect in normal use, but nothing
   // stops a non-admin from deep-linking straight here — the API would 403
   // them anyway, but this avoids that showing up as an unexplained stuck
@@ -145,6 +155,9 @@ export default function AdminScreen() {
                       .join(' • ') || 'No contact details'}
                   </Text>
                 </View>
+                <Pressable onPress={() => deleteLead(lead)} hitSlop={8} style={styles.deleteButton}>
+                  <Feather name="trash-2" size={15} color={Brand.text3} />
+                </Pressable>
               </View>
             ))
           )}
@@ -307,6 +320,9 @@ const styles = StyleSheet.create({
   badgeText: {
     fontSize: 10,
     fontFamily: Type.bodySemiBold,
+  },
+  deleteButton: {
+    padding: 4,
   },
   actionGrid: {
     flexDirection: 'row',
