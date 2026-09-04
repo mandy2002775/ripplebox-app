@@ -6,8 +6,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Radius, Type } from '@/constants/theme';
 import { useAuth } from '@/contexts/auth-context';
 
-const TERMS_URL = 'https://claude.ai/code/artifact/b812c43a-a284-488c-872b-ca1f293eb17d';
-const PRIVACY_URL = 'https://claude.ai/code/artifact/78dcc113-2ffa-4b32-b2b5-b005d37f6c38';
+const TERMS_URL = 'https://claude.ai/code/artifact/9beeba97-5c7d-4d59-99ee-1ed4cb03682b';
+const PRIVACY_URL = 'https://claude.ai/code/artifact/01601afa-942f-4b93-803c-68fbe7d17f2b';
 
 export default function WelcomeScreen() {
   const router = useRouter();
