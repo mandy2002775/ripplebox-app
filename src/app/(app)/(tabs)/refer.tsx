@@ -6,11 +6,14 @@ import { useCallback, useMemo, useState } from 'react';
 import { ActivityIndicator, Linking, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { ScreenHero } from '@/components/screen-hero';
 import { StatusBadge } from '@/components/status-badge';
 import { Brand, Radius, Shadow, Type } from '@/constants/theme';
 import { useAuth } from '@/contexts/auth-context';
 import { apiRequest } from '@/lib/api';
 import { ClientDashboard, ReferralStatus } from '@/lib/types';
+
+const HERO_IMAGE = 'https://images.unsplash.com/photo-1625463006115-09f08489f591?auto=format&fit=crop&w=1200&q=80';
 
 type FilterTab = 'all' | ReferralStatus;
 
@@ -94,6 +97,7 @@ export default function ReferScreen() {
   return (
     <View style={styles.screen}>
       <SafeAreaView style={styles.safeArea}>
+        <ScreenHero image={HERO_IMAGE} height={100} />
         <View style={styles.header}>
           <Text style={styles.heading}>Refer & earn</Text>
           <Text style={styles.subheading}>Share your code, track every referral</Text>

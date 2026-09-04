@@ -16,10 +16,13 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { ScreenHero } from '@/components/screen-hero';
 import { Brand, Radius, Shadow, Type } from '@/constants/theme';
 import { useAuth } from '@/contexts/auth-context';
 import { apiRequest, apiUploadRequest, ApiError } from '@/lib/api';
 import { ContentPost } from '@/lib/types';
+
+const HERO_IMAGE = 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?auto=format&fit=crop&w=1200&q=80';
 
 export default function ContentScreen() {
   const { token } = useAuth();
@@ -105,6 +108,7 @@ export default function ContentScreen() {
   return (
     <View style={styles.screen}>
       <SafeAreaView style={styles.safeArea}>
+        <ScreenHero image={HERO_IMAGE} height={100} />
         <View style={styles.header}>
           <Text style={styles.heading}>Content</Text>
           <Text style={styles.subheading}>Share photos of your work with Ripplebox clients</Text>

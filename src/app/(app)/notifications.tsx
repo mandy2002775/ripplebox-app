@@ -4,6 +4,7 @@ import { useCallback, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { ScreenHero } from '@/components/screen-hero';
 import { Brand, Radius, Shadow, Type } from '@/constants/theme';
 import { useAuth } from '@/contexts/auth-context';
 import { apiRequest } from '@/lib/api';
@@ -13,6 +14,8 @@ import {
   ReferralRedeemedPayload,
   RewardEarnedPayload,
 } from '@/lib/types';
+
+const HERO_IMAGE = 'https://images.unsplash.com/photo-1544082646-12fd181f4809?auto=format&fit=crop&w=1200&q=80';
 
 // The payload's shape is only as trustworthy as `type` says it is — a
 // backend/frontend version drift (a new notification type added server-side
@@ -96,6 +99,7 @@ export default function NotificationsScreen() {
   return (
     <View style={styles.screen}>
       <SafeAreaView style={styles.safeArea}>
+        <ScreenHero image={HERO_IMAGE} height={90} style={styles.hero} />
         <View style={styles.header}>
           <Pressable onPress={() => router.back()} style={styles.backButton}>
             <Feather name="chevron-left" size={18} color={Brand.brand} />
@@ -159,6 +163,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 12,
   },
+  hero: { marginHorizontal: -20, marginTop: -12, marginBottom: 12 },
   header: {
     flexDirection: 'row',
     alignItems: 'center',

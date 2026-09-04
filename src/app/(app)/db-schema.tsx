@@ -3,8 +3,11 @@ import { Redirect, useRouter } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { ScreenHero } from '@/components/screen-hero';
 import { Brand, Radius, Shadow, Type } from '@/constants/theme';
 import { useAuth } from '@/contexts/auth-context';
+
+const HERO_IMAGE = 'https://images.unsplash.com/photo-1638272181967-7d3772a91265?auto=format&fit=crop&w=1200&q=80';
 
 type Field = { name: string; type: string; kind?: 'pk' | 'fk' };
 
@@ -202,6 +205,7 @@ export default function DbSchemaScreen() {
   return (
     <View style={styles.screen}>
       <SafeAreaView style={styles.safeArea}>
+        <ScreenHero image={HERO_IMAGE} height={100} />
         <View style={styles.header}>
           <Pressable onPress={() => router.back()} style={styles.backButton}>
             <Feather name="chevron-left" size={18} color={Brand.brand} />

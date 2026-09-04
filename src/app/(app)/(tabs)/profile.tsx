@@ -15,12 +15,15 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { RowButton } from '@/components/row-button';
+import { ScreenHero } from '@/components/screen-hero';
 import { Brand, Radius, Shadow, Type } from '@/constants/theme';
 import { useAuth } from '@/contexts/auth-context';
 import { apiBlobRequest, apiRequest, ApiError } from '@/lib/api';
 import { saveBlob } from '@/lib/download';
 import { SALON_CATEGORIES } from '@/lib/salon-categories';
 import { PlanType, Salon, SalonCategory, User } from '@/lib/types';
+
+const HERO_IMAGE = 'https://images.unsplash.com/photo-1609535904959-aaa9d01fb5a4?auto=format&fit=crop&w=1200&q=80';
 
 const PLAN_LABELS: Record<PlanType, string> = {
   monthly: 'Monthly',
@@ -36,6 +39,7 @@ export default function ProfileScreen() {
     <View style={styles.screen}>
       <SafeAreaView style={styles.safeArea}>
         <ScrollView contentContainerStyle={styles.content}>
+          <ScreenHero image={HERO_IMAGE} height={110} style={styles.hero} />
           <Text style={styles.heading}>Profile</Text>
 
           {user.user_type === 'salon' && user.salon ? (
@@ -422,6 +426,7 @@ const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: Brand.bg },
   safeArea: { flex: 1 },
   content: { paddingHorizontal: 20, paddingTop: 18, paddingBottom: 40 },
+  hero: { marginHorizontal: -20, marginTop: -18, marginBottom: 14 },
   heading: { fontSize: 23, color: Brand.brand, marginBottom: 18, fontFamily: Type.displayBold, letterSpacing: -0.3 },
   card: {
     backgroundColor: Brand.surface,

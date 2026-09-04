@@ -1,6 +1,6 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { Linking, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, Linking, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Radius, Type } from '@/constants/theme';
@@ -8,6 +8,7 @@ import { useAuth } from '@/contexts/auth-context';
 
 const TERMS_URL = 'https://claude.ai/code/artifact/9beeba97-5c7d-4d59-99ee-1ed4cb03682b';
 const PRIVACY_URL = 'https://claude.ai/code/artifact/01601afa-942f-4b93-803c-68fbe7d17f2b';
+const BG_IMAGE = 'https://images.unsplash.com/photo-1600948836101-f9ffda59d250?auto=format&fit=crop&w=1200&q=80';
 
 export default function WelcomeScreen() {
   const router = useRouter();
@@ -15,8 +16,9 @@ export default function WelcomeScreen() {
 
   return (
     <View style={styles.screen}>
+      <Image source={{ uri: BG_IMAGE }} style={StyleSheet.absoluteFill} />
       <LinearGradient
-        colors={['#2E1152', '#1C0A3A', '#0F0519']}
+        colors={['rgba(46,17,82,0.82)', 'rgba(28,10,58,0.93)', '#0F0519']}
         start={{ x: 0.15, y: 0 }}
         end={{ x: 0.85, y: 1 }}
         style={StyleSheet.absoluteFill}

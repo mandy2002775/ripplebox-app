@@ -4,10 +4,13 @@ import { useCallback, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { ScreenHero } from '@/components/screen-hero';
 import { Brand, Radius, Shadow, Type } from '@/constants/theme';
 import { useAuth } from '@/contexts/auth-context';
 import { apiRequest } from '@/lib/api';
 import { AdminStats, AdminSubscriptionSummary, PlanType, SalonLead } from '@/lib/types';
+
+const HERO_IMAGE = 'https://images.unsplash.com/photo-1557682250-33bd709cbe85?auto=format&fit=crop&w=1200&q=80';
 
 const PLAN_LABELS: Record<PlanType, string> = {
   monthly: 'Monthly',
@@ -70,6 +73,7 @@ export default function AdminScreen() {
   return (
     <View style={styles.screen}>
       <SafeAreaView style={styles.safeArea}>
+        <ScreenHero image={HERO_IMAGE} height={110} fadeTo={Brand.brand} />
         <View style={styles.header}>
           <View>
             <Text style={styles.eyebrow}>Owner access only</Text>

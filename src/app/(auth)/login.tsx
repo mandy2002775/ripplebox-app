@@ -12,10 +12,13 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { ScreenHero } from '@/components/screen-hero';
 import { Brand, Radius, Shadow, Type } from '@/constants/theme';
 import { useAuth } from '@/contexts/auth-context';
 import { ApiError } from '@/lib/api';
 import { UserType } from '@/lib/types';
+
+const HERO_IMAGE = 'https://images.unsplash.com/photo-1637777277337-f114350fb088?auto=format&fit=crop&w=1200&q=80';
 
 type Stage = 'phone' | 'code';
 
@@ -76,6 +79,7 @@ export default function LoginScreen() {
 
   return (
     <View style={styles.screen}>
+      <ScreenHero image={HERO_IMAGE} height={100} />
       <SafeAreaView style={styles.safeArea}>
         <Pressable
           onPress={() => (stage === 'code' ? setStage('phone') : router.back())}

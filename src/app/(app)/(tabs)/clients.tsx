@@ -4,10 +4,13 @@ import { useCallback, useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { ScreenHero } from '@/components/screen-hero';
 import { Brand, Radius, Shadow, Type } from '@/constants/theme';
 import { useAuth } from '@/contexts/auth-context';
 import { apiRequest } from '@/lib/api';
 import { SalonClientSummary } from '@/lib/types';
+
+const HERO_IMAGE = 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=1200&q=80';
 
 export default function ClientsScreen() {
   const { token } = useAuth();
@@ -38,6 +41,7 @@ export default function ClientsScreen() {
   return (
     <View style={styles.screen}>
       <SafeAreaView style={styles.safeArea}>
+        <ScreenHero image={HERO_IMAGE} height={100} />
         <View style={styles.header}>
           <Text style={styles.heading}>Clients</Text>
           <Text style={styles.subheading}>Everyone who's referred or been referred to you</Text>

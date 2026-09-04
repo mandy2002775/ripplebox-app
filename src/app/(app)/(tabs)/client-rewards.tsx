@@ -4,10 +4,13 @@ import { useCallback, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { ScreenHero } from '@/components/screen-hero';
 import { Brand, Radius, Shadow, Type } from '@/constants/theme';
 import { useAuth } from '@/contexts/auth-context';
 import { apiRequest } from '@/lib/api';
 import { ClientDashboard } from '@/lib/types';
+
+const HERO_IMAGE = 'https://images.unsplash.com/photo-1513201099705-a9746e1e201f?auto=format&fit=crop&w=1200&q=80';
 
 // Named distinctly from (tabs)/rewards.tsx, which is the salon's own
 // rewards-management screen — this is the client's read-only "what have I
@@ -32,6 +35,7 @@ export default function ClientRewardsScreen() {
   return (
     <View style={styles.screen}>
       <SafeAreaView style={styles.safeArea}>
+        <ScreenHero image={HERO_IMAGE} height={100} />
         <View style={styles.header}>
           <Text style={styles.heading}>My rewards</Text>
           <Text style={styles.subheading}>Everything you've earned from referring friends</Text>

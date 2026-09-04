@@ -14,11 +14,14 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { RowButton } from '@/components/row-button';
+import { ScreenHero } from '@/components/screen-hero';
 import { Brand, Radius, Shadow, Type } from '@/constants/theme';
 import { useAuth } from '@/contexts/auth-context';
 import { apiRequest, ApiError } from '@/lib/api';
 import { SALON_CATEGORIES, salonCategoryLabel } from '@/lib/salon-categories';
 import { SalonCategory, SalonContentPost, SalonSummary } from '@/lib/types';
+
+const HERO_IMAGE = 'https://images.unsplash.com/photo-1626383120723-2a941488860d?auto=format&fit=crop&w=1200&q=80';
 
 export default function DiscoverScreen() {
   const { token } = useAuth();
@@ -139,6 +142,7 @@ export default function DiscoverScreen() {
   return (
     <View style={styles.screen}>
       <SafeAreaView style={styles.safeArea}>
+        <ScreenHero image={HERO_IMAGE} height={100} />
         <View style={styles.header}>
           <Text style={styles.heading}>Discover</Text>
           <Text style={styles.subheading}>Find a salon and redeem a friend's code</Text>

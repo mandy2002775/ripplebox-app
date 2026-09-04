@@ -5,10 +5,13 @@ import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { ScreenHero } from '@/components/screen-hero';
 import { Brand, Radius, Shadow, Type } from '@/constants/theme';
 import { useAuth } from '@/contexts/auth-context';
 import { apiBlobRequest, apiRequest } from '@/lib/api';
 import { saveBlob } from '@/lib/download';
+
+const HERO_IMAGE = 'https://images.unsplash.com/photo-1557682268-e3955ed5d83f?auto=format&fit=crop&w=1200&q=80';
 import { ReportRange, ReportsSummary } from '@/lib/types';
 
 const RANGES: { value: ReportRange; label: string }[] = [
@@ -67,6 +70,7 @@ export default function ReportsScreen() {
   return (
     <View style={styles.screen}>
       <SafeAreaView style={styles.safeArea}>
+        <ScreenHero image={HERO_IMAGE} height={100} />
         <View style={styles.header}>
           <Pressable onPress={() => router.back()} style={styles.backButton}>
             <Feather name="chevron-left" size={18} color={Brand.brand} />

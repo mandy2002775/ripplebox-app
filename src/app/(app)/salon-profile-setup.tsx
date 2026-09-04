@@ -5,11 +5,14 @@ import { useState } from 'react';
 import { ActivityIndicator, Image, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { ScreenHero } from '@/components/screen-hero';
 import { Brand, Radius, Shadow, Type } from '@/constants/theme';
 import { useAuth } from '@/contexts/auth-context';
 import { apiRequest, ApiError } from '@/lib/api';
 import { SALON_CATEGORIES } from '@/lib/salon-categories';
 import { Salon, SalonCategory } from '@/lib/types';
+
+const HERO_IMAGE = 'https://images.unsplash.com/photo-1626383137804-ff908d2753a2?auto=format&fit=crop&w=1200&q=80';
 
 export default function SalonProfileSetupScreen() {
   const { token, refreshUser } = useAuth();
@@ -57,6 +60,7 @@ export default function SalonProfileSetupScreen() {
   return (
     <View style={styles.screen}>
       <SafeAreaView style={styles.safeArea}>
+        <ScreenHero image={HERO_IMAGE} height={120} />
         <ScrollView contentContainerStyle={styles.scroll}>
           <Text style={styles.heading}>Business profile</Text>
           <Text style={styles.subheading}>Step 1 of 2 — Your details</Text>

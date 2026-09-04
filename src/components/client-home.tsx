@@ -5,11 +5,14 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { ActivityIndicator, Linking, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
 
+import { ScreenHero } from '@/components/screen-hero';
 import { StatusBadge } from '@/components/status-badge';
 import { Brand, Radius, Shadow, Type } from '@/constants/theme';
 import { useAuth } from '@/contexts/auth-context';
 import { apiRequest } from '@/lib/api';
 import { ClientDashboard, NotificationsResponse, User } from '@/lib/types';
+
+const HERO_IMAGE = 'https://images.unsplash.com/photo-1695527081874-b674c46f40fb?auto=format&fit=crop&w=1200&q=80';
 
 export function ClientHome({ user }: { user: User }) {
   const { token } = useAuth();
@@ -72,6 +75,7 @@ export function ClientHome({ user }: { user: User }) {
 
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
+      <ScreenHero image={HERO_IMAGE} height={130} style={styles.hero} />
       <View style={styles.headerRow}>
         <View>
           <Text style={styles.eyebrow}>Good to see you</Text>
@@ -190,6 +194,7 @@ export function ClientHome({ user }: { user: User }) {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: Brand.bg },
   content: { paddingHorizontal: 20, paddingTop: 24, paddingBottom: 40 },
+  hero: { marginHorizontal: -20, marginTop: -24, marginBottom: 16 },
   eyebrow: {
     fontSize: 11,
     color: Brand.text3,

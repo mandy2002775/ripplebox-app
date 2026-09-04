@@ -3,12 +3,15 @@ import { useRouter, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { ActivityIndicator, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
+import { RowButton } from '@/components/row-button';
+import { ScreenHero } from '@/components/screen-hero';
 import { StatusBadge } from '@/components/status-badge';
 import { Brand, Radius, Shadow, Type } from '@/constants/theme';
 import { useAuth } from '@/contexts/auth-context';
 import { apiRequest, ApiError } from '@/lib/api';
 import { NotificationsResponse, SalonDashboard, User } from '@/lib/types';
-import { RowButton } from '@/components/row-button';
+
+const HERO_IMAGE = 'https://images.unsplash.com/photo-1624555130581-1d9cca783bc0?auto=format&fit=crop&w=1200&q=80';
 
 export function SalonHome({ user }: { user: User }) {
   const { token } = useAuth();
@@ -75,6 +78,7 @@ export function SalonHome({ user }: { user: User }) {
 
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
+      <ScreenHero image={HERO_IMAGE} height={130} style={styles.hero} />
       <View style={styles.headerRow}>
         <View style={styles.headerIdentity}>
           {user.salon?.logo_url ? (
@@ -221,6 +225,7 @@ const styles = StyleSheet.create({
     paddingTop: 24,
     paddingBottom: 40,
   },
+  hero: { marginHorizontal: -20, marginTop: -24, marginBottom: 16 },
   eyebrow: {
     fontSize: 11,
     color: Brand.text3,

@@ -13,10 +13,13 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { ScreenHero } from '@/components/screen-hero';
 import { Brand, Radius, Shadow, Type } from '@/constants/theme';
 import { useAuth } from '@/contexts/auth-context';
 import { apiRequest, ApiError } from '@/lib/api';
 import { PlanType, SalonSubscription } from '@/lib/types';
+
+const HERO_IMAGE = 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&w=1200&q=80';
 
 const PLANS: { value: PlanType; label: string; price: string; note: string; badge?: string }[] = [
   { value: 'monthly', label: 'Monthly', price: '$49', note: 'per month' },
@@ -70,6 +73,7 @@ export default function SubscriptionSetupScreen() {
   return (
     <View style={styles.screen}>
       <SafeAreaView style={styles.safeArea} edges={['top']}>
+        <ScreenHero image={HERO_IMAGE} height={110} />
         <View style={styles.header}>
           <View>
             <Text style={styles.heading}>Subscribe</Text>

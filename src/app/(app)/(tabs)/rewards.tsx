@@ -12,10 +12,13 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { RowButton } from '@/components/row-button';
+import { ScreenHero } from '@/components/screen-hero';
 import { Brand, Radius, Shadow, Type } from '@/constants/theme';
 import { useAuth } from '@/contexts/auth-context';
 import { apiRequest, ApiError } from '@/lib/api';
 import { RecipientType, Reward, RewardType } from '@/lib/types';
+
+const HERO_IMAGE = 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?auto=format&fit=crop&w=1200&q=80';
 
 type Tab = 'create' | 'active' | 'expired';
 
@@ -113,6 +116,7 @@ export default function RewardsScreen() {
   return (
     <View style={styles.screen}>
       <SafeAreaView style={styles.safeArea}>
+        <ScreenHero image={HERO_IMAGE} height={100} />
         <View style={styles.header}>
           <Text style={styles.heading}>Rewards</Text>
           <Text style={styles.subheading}>Create and manage your referral rewards</Text>
