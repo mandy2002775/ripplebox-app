@@ -1,3 +1,4 @@
+import { Feather } from '@expo/vector-icons';
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
@@ -13,10 +14,11 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { RowButton } from '@/components/row-button';
-import { Brand } from '@/constants/theme';
+import { Brand, Radius, Shadow, Type } from '@/constants/theme';
 import { useAuth } from '@/contexts/auth-context';
 import { apiRequest, ApiError } from '@/lib/api';
-import { SalonContentPost, SalonSummary } from '@/lib/types';
+import { SALON_CATEGORIES, salonCategoryLabel } from '@/lib/salon-categories';
+import { SalonCategory, SalonContentPost, SalonSummary } from '@/lib/types';
 
 export default function DiscoverScreen() {
   const { token } = useAuth();
@@ -24,6 +26,7 @@ export default function DiscoverScreen() {
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
   const [query, setQuery] = useState('');
+  const [category, setCategory] = useState<SalonCategory | null>(null);
 
   const [selectedSalonId, setSelectedSalonId] = useState<string | null>(null);
   const [redeemCode, setRedeemCode] = useState('');
@@ -83,11 +86,13 @@ export default function DiscoverScreen() {
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return salons;
-    return salons.filter(
-      (s) => s.business_name.toLowerCase().includes(q) || s.location.toLowerCase().includes(q)
-    );
-  }, [salons, query]);
+    return salons.filter((s) => {
+      const matchesQuery =
+        !q || s.business_name.toLowerCase().includes(q) || s.location.toLowerCase().includes(q);
+      const matchesCategory = !category || s.category === category;
+      return matchesQuery && matchesCategory;
+    });
+  }, [salons, query, category]);
 
   async function handleRedeem() {
     if (!selectedSalonId || !redeemCode.trim()) return;
@@ -121,6 +126,7 @@ export default function DiscoverScreen() {
         </View>
 
         <View style={styles.searchWrap}>
+          <Feather name="search" size={15} color={Brand.text3} style={styles.searchIcon} />
           <TextInput
             style={styles.search}
             value={query}
@@ -129,6 +135,43 @@ export default function DiscoverScreen() {
             placeholderTextColor={Brand.text3}
           />
         </View>
+
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.categoryStrip}
+          contentContainerStyle={styles.categoryStripContent}>
+          <Pressable
+            onPress={() => setCategory(null)}
+            style={[styles.categoryFilterChip, !category && styles.categoryFilterChipActive]}>
+            <Text
+              style={[styles.categoryFilterChipText, !category && styles.categoryFilterChipTextActive]}>
+              All
+            </Text>
+          </Pressable>
+          {SALON_CATEGORIES.map((c) => (
+            <Pressable
+              key={c.value}
+              onPress={() => setCategory(category === c.value ? null : c.value)}
+              style={[
+                styles.categoryFilterChip,
+                category === c.value && styles.categoryFilterChipActive,
+              ]}>
+              <Feather
+                name={c.icon}
+                size={11}
+                color={category === c.value ? '#fff' : Brand.accent}
+              />
+              <Text
+                style={[
+                  styles.categoryFilterChipText,
+                  category === c.value && styles.categoryFilterChipTextActive,
+                ]}>
+                {c.label}
+              </Text>
+            </Pressable>
+          ))}
+        </ScrollView>
 
         <ScrollView contentContainerStyle={styles.body}>
           {loadError ? (
@@ -139,7 +182,7 @@ export default function DiscoverScreen() {
               </Pressable>
             </View>
           ) : isLoading ? (
-            <ActivityIndicator color={Brand.brand} style={{ marginTop: 20 }} />
+            <ActivityIndicator color={Brand.accent} style={{ marginTop: 20 }} />
           ) : filtered.length === 0 ? (
             <Text style={styles.emptyText}>
               {salons.length === 0 ? 'No salons on Ripplebox yet.' : 'No salons match your search.'}
@@ -159,20 +202,28 @@ export default function DiscoverScreen() {
                   )}
                   <View style={{ flex: 1 }}>
                     <Text style={styles.rowTitle}>{s.business_name}</Text>
-                    <Text style={styles.rowSub}>{s.location}</Text>
+                    <Text style={styles.rowSub}>
+                      {s.location}
+                      {salonCategoryLabel(s.category) ? ` • ${salonCategoryLabel(s.category)}` : ''}
+                    </Text>
                     {s.top_reward && (
                       <View style={styles.rewardChip}>
-                        <Text style={styles.rewardChipText}>🎁 {s.top_reward}</Text>
+                        <Feather name="gift" size={9} color={Brand.amber} />
+                        <Text style={styles.rewardChipText}>{s.top_reward}</Text>
                       </View>
                     )}
                   </View>
-                  <Text style={styles.chevron}>{selectedSalonId === s.id ? '▾' : '▸'}</Text>
+                  <Feather
+                    name={selectedSalonId === s.id ? 'chevron-down' : 'chevron-right'}
+                    size={16}
+                    color={Brand.text3}
+                  />
                 </Pressable>
 
                 {selectedSalonId === s.id && (
                   <View style={styles.redeemBox}>
                     {isLoadingContent ? (
-                      <ActivityIndicator color={Brand.brand} style={{ marginBottom: 10 }} />
+                      <ActivityIndicator color={Brand.accent} style={{ marginBottom: 10 }} />
                     ) : (
                       content.length > 0 && (
                         <ScrollView
@@ -187,9 +238,12 @@ export default function DiscoverScreen() {
                                 style={styles.contentImage}
                               />
                               <Pressable onPress={() => toggleLike(post)} style={styles.likeButton}>
-                                <Text style={styles.likeButtonText}>
-                                  {post.liked_by_me ? '❤️' : '🤍'} {post.likes_count}
-                                </Text>
+                                <Feather
+                                  name="heart"
+                                  size={11}
+                                  color={post.liked_by_me ? Brand.roseVivid : Brand.text3}
+                                />
+                                <Text style={styles.likeButtonText}>{post.likes_count}</Text>
                               </Pressable>
                             </View>
                           ))}
@@ -230,106 +284,134 @@ export default function DiscoverScreen() {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: Brand.bg },
   safeArea: { flex: 1 },
-  header: { paddingHorizontal: 20, paddingTop: 12, marginBottom: 12 },
-  heading: { fontSize: 16, fontWeight: '500', color: Brand.brand },
-  subheading: { fontSize: 11, color: Brand.text2 },
-  searchWrap: { paddingHorizontal: 20, marginBottom: 12 },
+  header: { paddingHorizontal: 20, paddingTop: 14, marginBottom: 14 },
+  heading: { fontSize: 19, color: Brand.brand, fontFamily: Type.displayBold, letterSpacing: -0.2 },
+  subheading: { fontSize: 11.5, color: Brand.text2, marginTop: 2, fontFamily: Type.body },
+  searchWrap: { paddingHorizontal: 20, marginBottom: 14, position: 'relative', justifyContent: 'center' },
+  searchIcon: { position: 'absolute', left: 33, zIndex: 1 },
   search: {
-    backgroundColor: '#fff',
-    borderWidth: 0.5,
-    borderColor: Brand.border,
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 11,
+    backgroundColor: Brand.surface,
+    borderRadius: Radius.sm,
+    paddingLeft: 38,
+    paddingRight: 14,
+    paddingVertical: 12,
     fontSize: 13.5,
     color: Brand.brand,
+    fontFamily: Type.bodyMedium,
+    ...Shadow.sm,
+  },
+  categoryStrip: { marginBottom: 14 },
+  categoryStripContent: { paddingHorizontal: 20, gap: 7 },
+  categoryFilterChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    backgroundColor: Brand.surface,
+    borderRadius: Radius.pill,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    ...Shadow.sm,
+  },
+  categoryFilterChipActive: {
+    backgroundColor: Brand.accent,
+    shadowOpacity: 0,
+    elevation: 0,
+  },
+  categoryFilterChipText: {
+    fontSize: 11.5,
+    color: Brand.brand,
+    fontFamily: Type.bodyMedium,
+  },
+  categoryFilterChipTextActive: {
+    color: '#fff',
+    fontFamily: Type.bodySemiBold,
   },
   body: { paddingHorizontal: 20, paddingBottom: 40 },
-  emptyText: { fontSize: 12, color: Brand.text3, textAlign: 'center', marginTop: 30 },
+  emptyText: { fontSize: 12, color: Brand.text3, textAlign: 'center', marginTop: 30, fontFamily: Type.body },
   salonRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
-    backgroundColor: '#fff',
-    borderWidth: 0.5,
-    borderColor: Brand.border,
-    borderRadius: 14,
-    padding: 12,
-    marginBottom: 7,
+    gap: 11,
+    backgroundColor: Brand.surface,
+    borderRadius: Radius.md,
+    padding: 13,
+    marginBottom: 8,
+    ...Shadow.sm,
   },
   salonRowSelected: {
-    borderWidth: 1.5,
-    borderColor: Brand.brand,
     backgroundColor: Brand.lavender,
+    shadowOpacity: 0,
+    elevation: 0,
   },
-  salonLogo: { width: 40, height: 40, borderRadius: 12, backgroundColor: Brand.lavender },
+  salonLogo: { width: 42, height: 42, borderRadius: Radius.sm, backgroundColor: Brand.lavender },
   salonLogoPlaceholder: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
+    width: 42,
+    height: 42,
+    borderRadius: Radius.sm,
     backgroundColor: Brand.brand,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  salonLogoInitial: { fontSize: 15, fontWeight: '600', color: '#fff' },
-  rowTitle: { fontSize: 12.5, fontWeight: '500', color: Brand.brand },
-  rowSub: { fontSize: 11, color: Brand.text2, marginTop: 1 },
+  salonLogoInitial: { fontSize: 15, color: '#fff', fontFamily: Type.bodyBold },
+  rowTitle: { fontSize: 13, color: Brand.brand, fontFamily: Type.bodySemiBold },
+  rowSub: { fontSize: 11, color: Brand.text2, marginTop: 1, fontFamily: Type.body },
   rewardChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
     alignSelf: 'flex-start',
     backgroundColor: Brand.amberBg,
-    borderRadius: 8,
-    paddingHorizontal: 7,
-    paddingVertical: 2,
+    borderRadius: Radius.pill,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
     marginTop: 5,
   },
-  rewardChipText: { fontSize: 10, fontWeight: '500', color: Brand.amber },
-  chevron: { fontSize: 14, color: Brand.text3 },
+  rewardChipText: { fontSize: 10, color: Brand.amber, fontFamily: Type.bodyMedium },
   redeemBox: {
-    backgroundColor: '#fff',
-    borderWidth: 0.5,
-    borderColor: Brand.border,
-    borderRadius: 14,
-    padding: 14,
+    backgroundColor: Brand.surface,
+    borderRadius: Radius.md,
+    padding: 15,
     marginTop: -3,
-    marginBottom: 7,
+    marginBottom: 8,
+    ...Shadow.sm,
   },
-  redeemLabel: { fontSize: 11.5, fontWeight: '500', color: Brand.brand3, marginBottom: 8 },
+  redeemLabel: { fontSize: 12, color: Brand.brand3, marginBottom: 9, fontFamily: Type.bodySemiBold },
   contentStrip: { marginBottom: 12 },
   contentItem: { width: 100 },
   contentImage: {
     width: 100,
     height: 100,
-    borderRadius: 10,
+    borderRadius: Radius.sm,
     backgroundColor: Brand.lavender,
   },
-  likeButton: { marginTop: 4, alignSelf: 'flex-start' },
-  likeButtonText: { fontSize: 11, color: Brand.text2 },
+  likeButton: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 5 },
+  likeButtonText: { fontSize: 11, color: Brand.text2, fontFamily: Type.bodyMedium },
   input: {
     backgroundColor: Brand.lavender,
-    borderRadius: 11,
+    borderRadius: Radius.sm,
     paddingHorizontal: 14,
     paddingVertical: 12,
     fontSize: 14,
     color: Brand.brand,
     marginBottom: 10,
+    fontFamily: Type.bodyMedium,
   },
-  error: { fontSize: 12, color: Brand.red, marginBottom: 8 },
-  success: { fontSize: 12, color: Brand.green, marginBottom: 8 },
+  error: { fontSize: 12, color: Brand.red, marginBottom: 8, fontFamily: Type.body },
+  success: { fontSize: 12, color: Brand.green, marginBottom: 8, fontFamily: Type.body },
   errorBox: {
-    backgroundColor: '#fff',
-    borderWidth: 0.5,
-    borderColor: Brand.border,
-    borderRadius: 14,
-    padding: 20,
+    backgroundColor: Brand.surface,
+    borderRadius: Radius.md,
+    padding: 22,
     alignItems: 'center',
     marginTop: 10,
+    ...Shadow.sm,
   },
-  errorBoxText: { fontSize: 12.5, color: Brand.text2, marginBottom: 12 },
+  errorBoxText: { fontSize: 12.5, color: Brand.text2, marginBottom: 12, fontFamily: Type.body },
   retryButton: {
     backgroundColor: Brand.brand,
-    borderRadius: 10,
+    borderRadius: Radius.pill,
     paddingHorizontal: 18,
     paddingVertical: 9,
   },
-  retryButtonText: { fontSize: 12.5, fontWeight: '500', color: '#fff' },
+  retryButtonText: { fontSize: 12.5, color: '#fff', fontFamily: Type.bodySemiBold },
 });

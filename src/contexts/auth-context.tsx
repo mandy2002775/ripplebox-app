@@ -16,7 +16,8 @@ type AuthContextValue = {
     phoneNumber: string,
     code: string,
     name?: string,
-    userType?: UserType
+    userType?: UserType,
+    email?: string
   ) => Promise<User>;
   refreshUser: () => Promise<void>;
   signOut: () => Promise<void>;
@@ -82,7 +83,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           body: { phone_number: phoneNumber },
         });
       },
-      async verifyOtp(phoneNumber: string, code: string, name?: string, userType?: UserType) {
+      async verifyOtp(
+        phoneNumber: string,
+        code: string,
+        name?: string,
+        userType?: UserType,
+        email?: string
+      ) {
         const result = await apiRequest<VerifyOtpResponse>('/auth/otp/verify', {
           method: 'POST',
           body: {
@@ -90,6 +97,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             code,
             ...(name ? { name } : {}),
             ...(userType ? { user_type: userType } : {}),
+            ...(email ? { email } : {}),
           },
         });
 

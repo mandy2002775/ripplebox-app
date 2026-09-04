@@ -1,3 +1,5 @@
+import { Feather } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useState } from 'react';
 import {
   ActivityIndicator,
@@ -12,11 +14,12 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { RowButton } from '@/components/row-button';
-import { Brand } from '@/constants/theme';
+import { Brand, Radius, Shadow, Type } from '@/constants/theme';
 import { useAuth } from '@/contexts/auth-context';
 import { apiBlobRequest, apiRequest, ApiError } from '@/lib/api';
 import { saveBlob } from '@/lib/download';
-import { PlanType, Salon, User } from '@/lib/types';
+import { SALON_CATEGORIES } from '@/lib/salon-categories';
+import { PlanType, Salon, SalonCategory, User } from '@/lib/types';
 
 const PLAN_LABELS: Record<PlanType, string> = {
   monthly: 'Monthly',
@@ -104,16 +107,20 @@ function EmailSection({
         value={email}
         onChangeText={setEmail}
         placeholder="you@example.com"
+        placeholderTextColor={Brand.text3}
         autoCapitalize="none"
         keyboardType="email-address"
       />
       {error && <Text style={styles.error}>{error}</Text>}
       {saved && <Text style={styles.success}>Saved.</Text>}
-      <Pressable
-        disabled={isSaving}
-        onPress={handleSave}
-        style={({ pressed }) => [styles.button, (pressed || isSaving) && styles.pressed]}>
-        {isSaving ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Save email</Text>}
+      <Pressable disabled={isSaving} onPress={handleSave}>
+        <LinearGradient
+          colors={[Brand.roseVivid, Brand.accent]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={[styles.button, isSaving && styles.pressed]}>
+          {isSaving ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Save email</Text>}
+        </LinearGradient>
       </Pressable>
     </View>
   );
@@ -158,6 +165,7 @@ function PrivacySection({ token }: { token: string | null }) {
         disabled={isExporting}
         onPress={handleExport}
         style={({ pressed }) => [styles.privacyRow, (pressed || isExporting) && styles.pressed]}>
+        <Feather name="download" size={14} color={Brand.brand} />
         <Text style={styles.privacyRowText}>
           {isExporting ? 'Preparing your data…' : 'Download my data'}
         </Text>
@@ -165,6 +173,7 @@ function PrivacySection({ token }: { token: string | null }) {
 
       {!isConfirmingDelete ? (
         <Pressable onPress={() => setIsConfirmingDelete(true)} style={styles.privacyRow}>
+          <Feather name="trash-2" size={14} color={Brand.red} />
           <Text style={[styles.privacyRowText, styles.dangerText]}>Delete my account</Text>
         </Pressable>
       ) : (
@@ -204,6 +213,7 @@ function SalonProfile({
   refreshUser: () => Promise<void>;
 }) {
   const [businessName, setBusinessName] = useState(salon.business_name);
+  const [category, setCategory] = useState<SalonCategory | null>(salon.category);
   const [location, setLocation] = useState(salon.location);
   const [website, setWebsite] = useState(salon.website ?? '');
   const [instagramHandle, setInstagramHandle] = useState(salon.instagram_handle ?? '');
@@ -226,6 +236,7 @@ function SalonProfile({
         token,
         body: {
           business_name: businessName.trim(),
+          category,
           location: location.trim(),
           website: website.trim() || null,
           instagram_handle: instagramHandle.trim() || null,
@@ -258,11 +269,35 @@ function SalonProfile({
   return (
     <>
       <View style={styles.card}>
-        {logoUrl.trim() && (
+        {logoUrl.trim() ? (
           <Image source={{ uri: logoUrl.trim() }} style={styles.logoPreview} />
+        ) : (
+          <View style={styles.logoPlaceholder}>
+            <Feather name="scissors" size={18} color={Brand.accent} />
+          </View>
         )}
         <Text style={styles.fieldLabel}>Business name</Text>
         <TextInput style={styles.input} value={businessName} onChangeText={setBusinessName} />
+        <Text style={styles.fieldLabel}>
+          Category <Text style={styles.optional}>(optional)</Text>
+        </Text>
+        <View style={styles.categoryGrid}>
+          {SALON_CATEGORIES.map((c) => (
+            <Pressable
+              key={c.value}
+              onPress={() => setCategory(category === c.value ? null : c.value)}
+              style={[styles.categoryChip, category === c.value && styles.categoryChipActive]}>
+              <Feather name={c.icon} size={12} color={category === c.value ? '#fff' : Brand.accent} />
+              <Text
+                style={[
+                  styles.categoryChipText,
+                  category === c.value && styles.categoryChipTextActive,
+                ]}>
+                {c.label}
+              </Text>
+            </Pressable>
+          ))}
+        </View>
         <Text style={styles.fieldLabel}>Location</Text>
         <TextInput style={styles.input} value={location} onChangeText={setLocation} />
         <Text style={styles.fieldLabel}>
@@ -296,15 +331,18 @@ function SalonProfile({
         {saveError && <Text style={styles.error}>{saveError}</Text>}
         {saved && <Text style={styles.success}>Saved.</Text>}
 
-        <Pressable
-          disabled={isSaving}
-          onPress={handleSave}
-          style={({ pressed }) => [styles.button, (pressed || isSaving) && styles.pressed]}>
-          {isSaving ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text style={styles.buttonText}>Save changes</Text>
-          )}
+        <Pressable disabled={isSaving} onPress={handleSave}>
+          <LinearGradient
+            colors={[Brand.roseVivid, Brand.accent]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={[styles.button, isSaving && styles.pressed]}>
+            {isSaving ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.buttonText}>Save changes</Text>
+            )}
+          </LinearGradient>
         </Pressable>
       </View>
 
@@ -353,89 +391,128 @@ function SalonProfile({
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: Brand.bg },
   safeArea: { flex: 1 },
-  content: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 40 },
-  heading: { fontSize: 21, fontWeight: '500', color: Brand.brand, marginBottom: 16 },
+  content: { paddingHorizontal: 20, paddingTop: 18, paddingBottom: 40 },
+  heading: { fontSize: 23, color: Brand.brand, marginBottom: 18, fontFamily: Type.displayBold, letterSpacing: -0.3 },
   card: {
-    backgroundColor: '#fff',
-    borderWidth: 0.5,
-    borderColor: Brand.border,
-    borderRadius: 16,
-    padding: 16,
+    backgroundColor: Brand.surface,
+    borderRadius: Radius.lg,
+    padding: 17,
     marginBottom: 14,
+    ...Shadow.sm,
   },
   logoPreview: {
-    width: 56,
-    height: 56,
-    borderRadius: 16,
+    width: 58,
+    height: 58,
+    borderRadius: Radius.md,
     backgroundColor: Brand.lavender,
-    marginBottom: 12,
+    marginBottom: 14,
+  },
+  logoPlaceholder: {
+    width: 58,
+    height: 58,
+    borderRadius: Radius.md,
+    backgroundColor: Brand.lavender,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 14,
   },
   fieldLabel: {
     fontSize: 11,
-    fontWeight: '500',
     color: Brand.accent,
-    marginBottom: 5,
+    marginBottom: 6,
+    fontFamily: Type.bodySemiBold,
   },
   optional: {
     color: Brand.text3,
-    fontWeight: '400',
+    fontFamily: Type.body,
+  },
+  categoryGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 7,
+    marginBottom: 13,
+  },
+  categoryChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: Brand.bg,
+    borderRadius: Radius.pill,
+    paddingHorizontal: 11,
+    paddingVertical: 7,
+  },
+  categoryChipActive: {
+    backgroundColor: Brand.accent,
+  },
+  categoryChipText: {
+    fontSize: 11,
+    color: Brand.brand,
+    fontFamily: Type.bodyMedium,
+  },
+  categoryChipTextActive: {
+    color: '#fff',
+    fontFamily: Type.bodySemiBold,
   },
   emailHint: {
     fontSize: 11,
     color: Brand.text3,
-    marginBottom: 10,
+    marginBottom: 11,
+    fontFamily: Type.body,
   },
   readValue: {
-    fontSize: 14,
+    fontSize: 14.5,
     color: Brand.brand,
-    marginBottom: 12,
+    marginBottom: 13,
+    fontFamily: Type.bodyMedium,
   },
   input: {
     backgroundColor: Brand.lavender,
-    borderRadius: 11,
+    borderRadius: Radius.sm,
     paddingHorizontal: 14,
     paddingVertical: 12,
     fontSize: 14,
     color: Brand.brand,
     marginBottom: 12,
+    fontFamily: Type.bodyMedium,
   },
-  error: { fontSize: 12, color: Brand.red, marginBottom: 10 },
-  success: { fontSize: 12, color: Brand.green, marginBottom: 10 },
-  privacyRow: { paddingVertical: 10 },
-  privacyRowText: { fontSize: 13, color: Brand.brand },
+  error: { fontSize: 12, color: Brand.red, marginBottom: 10, fontFamily: Type.body },
+  success: { fontSize: 12, color: Brand.green, marginBottom: 10, fontFamily: Type.body },
+  privacyRow: { flexDirection: 'row', alignItems: 'center', gap: 9, paddingVertical: 10 },
+  privacyRowText: { fontSize: 13, color: Brand.brand, fontFamily: Type.bodyMedium },
   dangerText: { color: Brand.red },
   button: {
-    backgroundColor: Brand.brand,
-    borderRadius: 14,
+    borderRadius: Radius.pill,
     paddingVertical: 14,
     alignItems: 'center',
+    ...Shadow.sm,
+    shadowColor: Brand.accent,
   },
-  buttonText: { color: '#fff', fontSize: 14, fontWeight: '500' },
+  buttonText: { color: '#fff', fontSize: 14, fontFamily: Type.bodySemiBold },
   pressed: { opacity: 0.8 },
-  rowTitle: { fontSize: 13, fontWeight: '500', color: Brand.brand, marginTop: 4 },
-  rowSub: { fontSize: 11, color: Brand.text2, marginTop: 2 },
+  rowTitle: { fontSize: 13.5, color: Brand.brand, marginTop: 4, fontFamily: Type.bodySemiBold },
+  rowSub: { fontSize: 11, color: Brand.text2, marginTop: 2, fontFamily: Type.body },
   cancelLink: {
     alignSelf: 'flex-start',
     borderWidth: 1,
     borderColor: Brand.border,
-    borderRadius: 20,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
+    borderRadius: Radius.pill,
+    paddingHorizontal: 11,
+    paddingVertical: 5,
     marginTop: 10,
   },
-  cancelLinkText: { fontSize: 11, fontWeight: '500', color: Brand.text2 },
+  cancelLinkText: { fontSize: 11, color: Brand.text2, fontFamily: Type.bodyMedium },
   confirmBox: {
     backgroundColor: Brand.lavender,
-    borderRadius: 11,
-    padding: 12,
+    borderRadius: Radius.sm,
+    padding: 13,
     marginTop: 10,
   },
-  confirmText: { fontSize: 11, color: Brand.brand3, lineHeight: 16, marginBottom: 10 },
+  confirmText: { fontSize: 11, color: Brand.brand3, lineHeight: 16, marginBottom: 11, fontFamily: Type.body },
   confirmButton: {
-    backgroundColor: '#fff',
-    borderRadius: 11,
-    paddingVertical: 10,
+    backgroundColor: Brand.surface,
+    borderRadius: Radius.sm,
+    paddingVertical: 11,
     alignItems: 'center',
   },
-  confirmButtonText: { fontSize: 12.5, fontWeight: '500', color: Brand.brand },
+  confirmButtonText: { fontSize: 12.5, color: Brand.brand, fontFamily: Type.bodySemiBold },
 });

@@ -28,6 +28,7 @@ export default function LoginScreen() {
   const [phoneNumber, setPhoneNumber] = useState('+61');
   const [code, setCode] = useState('');
   const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
   const [debugCode, setDebugCode] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -54,7 +55,13 @@ export default function LoginScreen() {
     setError(null);
     setIsSubmitting(true);
     try {
-      await verifyOtp(phoneNumber.trim(), code.trim(), name.trim() || undefined, role);
+      await verifyOtp(
+        phoneNumber.trim(),
+        code.trim(),
+        name.trim() || undefined,
+        role,
+        email.trim() || undefined
+      );
       // AuthProvider now holds a user; the root layout's protected-route guard
       // takes it from here and swaps to the (app) group automatically.
     } catch (e) {
@@ -145,6 +152,17 @@ export default function LoginScreen() {
               placeholder={role === 'salon' ? 'Kate Dawes' : 'Jane Doe'}
               placeholderTextColor={Brand.text3}
             />
+            <Text style={styles.fieldLabel}>Email</Text>
+            <TextInput
+              style={styles.input}
+              value={email}
+              onChangeText={setEmail}
+              placeholder="you@example.com"
+              placeholderTextColor={Brand.text3}
+              autoCapitalize="none"
+              keyboardType="email-address"
+            />
+            <Text style={styles.hint}>We'll send your welcome email here — you can change it anytime in Profile.</Text>
             {error && <Text style={styles.error}>{error}</Text>}
             <Pressable disabled={isSubmitting || !canVerify} onPress={handleVerify}>
               {({ pressed }) =>
@@ -238,6 +256,13 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: Brand.amber,
     fontFamily: Type.bodyMedium,
+  },
+  hint: {
+    fontSize: 10.5,
+    color: Brand.text3,
+    marginBottom: 6,
+    lineHeight: 15,
+    fontFamily: Type.body,
   },
   error: {
     fontSize: 12,

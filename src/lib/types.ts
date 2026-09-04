@@ -14,9 +14,20 @@ export type SalonSubscription = {
   current_period_end: string;
 };
 
+export type SalonCategory =
+  | 'hair'
+  | 'nails'
+  | 'skin'
+  | 'brows_lashes'
+  | 'barber'
+  | 'spa'
+  | 'makeup'
+  | 'other';
+
 export type Salon = {
   id: string;
   business_name: string;
+  category: SalonCategory | null;
   location: string;
   website: string | null;
   instagram_handle: string | null;
@@ -76,6 +87,7 @@ export type SalonDashboard = {
 export type SalonSummary = {
   id: string;
   business_name: string;
+  category: SalonCategory | null;
   location: string;
   logo_url: string | null;
   top_reward: string | null;
