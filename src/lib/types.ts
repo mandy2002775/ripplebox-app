@@ -91,6 +91,7 @@ export type SalonSummary = {
   location: string;
   logo_url: string | null;
   top_reward: string | null;
+  is_favorited: boolean;
 };
 
 export type ContentPost = {

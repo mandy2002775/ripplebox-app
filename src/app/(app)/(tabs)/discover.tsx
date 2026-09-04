@@ -27,6 +27,7 @@ export default function DiscoverScreen() {
   const [loadError, setLoadError] = useState(false);
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState<SalonCategory | null>(null);
+  const [favoritesOnly, setFavoritesOnly] = useState(false);
 
   const [selectedSalonId, setSelectedSalonId] = useState<string | null>(null);
   const [redeemCode, setRedeemCode] = useState('');
@@ -90,9 +91,27 @@ export default function DiscoverScreen() {
       const matchesQuery =
         !q || s.business_name.toLowerCase().includes(q) || s.location.toLowerCase().includes(q);
       const matchesCategory = !category || s.category === category;
-      return matchesQuery && matchesCategory;
+      const matchesFavorites = !favoritesOnly || s.is_favorited;
+      return matchesQuery && matchesCategory && matchesFavorites;
     });
-  }, [salons, query, category]);
+  }, [salons, query, category, favoritesOnly]);
+
+  async function toggleFavorite(salon: SalonSummary) {
+    setSalons((prev) =>
+      prev.map((s) => (s.id === salon.id ? { ...s, is_favorited: !s.is_favorited } : s))
+    );
+    try {
+      await apiRequest<{ is_favorited: boolean }>(`/salons/${salon.id}/favorite`, {
+        method: 'POST',
+        token,
+      });
+    } catch {
+      // Roll back on failure — same pattern as content likes.
+      setSalons((prev) =>
+        prev.map((s) => (s.id === salon.id ? { ...s, is_favorited: salon.is_favorited } : s))
+      );
+    }
+  }
 
   async function handleRedeem() {
     if (!selectedSalonId || !redeemCode.trim()) return;
@@ -147,6 +166,18 @@ export default function DiscoverScreen() {
             <Text
               style={[styles.categoryFilterChipText, !category && styles.categoryFilterChipTextActive]}>
               All
+            </Text>
+          </Pressable>
+          <Pressable
+            onPress={() => setFavoritesOnly((v) => !v)}
+            style={[styles.categoryFilterChip, favoritesOnly && styles.categoryFilterChipActive]}>
+            <Feather name="heart" size={11} color={favoritesOnly ? '#fff' : Brand.roseVivid} />
+            <Text
+              style={[
+                styles.categoryFilterChipText,
+                favoritesOnly && styles.categoryFilterChipTextActive,
+              ]}>
+              Favorites
             </Text>
           </Pressable>
           {SALON_CATEGORIES.map((c) => (
@@ -213,6 +244,13 @@ export default function DiscoverScreen() {
                       </View>
                     )}
                   </View>
+                  <Pressable onPress={() => toggleFavorite(s)} hitSlop={8} style={styles.favoriteButton}>
+                    <Feather
+                      name="heart"
+                      size={17}
+                      color={s.is_favorited ? Brand.roseVivid : Brand.text3}
+                    />
+                  </Pressable>
                   <Feather
                     name={selectedSalonId === s.id ? 'chevron-down' : 'chevron-right'}
                     size={16}
@@ -353,6 +391,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   salonLogoInitial: { fontSize: 15, color: '#fff', fontFamily: Type.bodyBold },
+  favoriteButton: { padding: 4 },
   rowTitle: { fontSize: 13, color: Brand.brand, fontFamily: Type.bodySemiBold },
   rowSub: { fontSize: 11, color: Brand.text2, marginTop: 1, fontFamily: Type.body },
   rewardChip: {
