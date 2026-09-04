@@ -4,6 +4,7 @@ import { useState } from 'react';
 import {
   ActivityIndicator,
   Image,
+  Linking,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -55,6 +56,8 @@ export default function ProfileScreen() {
           )}
 
           <EmailSection user={user} token={token} refreshUser={refreshUser} />
+
+          <SupportSection userType={user.user_type} />
 
           <PrivacySection token={token} />
 
@@ -121,6 +124,33 @@ function EmailSection({
           style={[styles.button, isSaving && styles.pressed]}>
           {isSaving ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Save email</Text>}
         </LinearGradient>
+      </Pressable>
+    </View>
+  );
+}
+
+const SUPPORT_EMAIL = 'hello@ripplebox.com.au';
+
+function SupportSection({ userType }: { userType: User['user_type'] }) {
+  function handleEmailSupport() {
+    const subject = encodeURIComponent(
+      userType === 'salon' ? 'Ripplebox business support' : 'Ripplebox support'
+    );
+    Linking.openURL(`mailto:${SUPPORT_EMAIL}?subject=${subject}`);
+  }
+
+  return (
+    <View style={styles.card}>
+      <Text style={styles.fieldLabel}>Help &amp; support</Text>
+      <Pressable
+        onPress={handleEmailSupport}
+        style={({ pressed }) => [styles.privacyRow, pressed && styles.pressed]}>
+        <Feather name="mail" size={14} color={Brand.brand} />
+        <View style={{ flex: 1 }}>
+          <Text style={styles.privacyRowText}>Email support</Text>
+          <Text style={styles.supportHint}>Send us a detailed message — we'll get back to you</Text>
+        </View>
+        <Feather name="chevron-right" size={15} color={Brand.text3} />
       </Pressable>
     </View>
   );
@@ -479,6 +509,7 @@ const styles = StyleSheet.create({
   success: { fontSize: 12, color: Brand.green, marginBottom: 10, fontFamily: Type.body },
   privacyRow: { flexDirection: 'row', alignItems: 'center', gap: 9, paddingVertical: 10 },
   privacyRowText: { fontSize: 13, color: Brand.brand, fontFamily: Type.bodyMedium },
+  supportHint: { fontSize: 10.5, color: Brand.text2, marginTop: 1, fontFamily: Type.body },
   dangerText: { color: Brand.red },
   button: {
     borderRadius: Radius.pill,
