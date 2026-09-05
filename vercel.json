@@ -1,4 +1,5 @@
 {
   "buildCommand": "npm run vercel-build",
-  "outputDirectory": "dist"
+  "outputDirectory": "dist",
+  "cleanUrls": true
 }
